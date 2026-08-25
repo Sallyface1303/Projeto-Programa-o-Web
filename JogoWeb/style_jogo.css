@@ -1,0 +1,53 @@
+* {
+    background-color: aqua;
+}
+
+.header {
+    background-color: aqua;
+}
+
+.row {
+    display: flex;
+    background-color: cornsilk;
+    min-height: 215px;
+}
+
+.row2 {
+    min-height: 215px;
+    background-color: blanchedalmond;
+}
+
+.hole {
+    background-color: crimson;
+    height: auto;
+}
+
+.pause {
+    position: relative;
+    left: 3px;
+    bottom: 4px;
+    height: 30px;
+    width: 30px;
+}
+
+.crt::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+
+    z-index: 9999;
+}
+
+.crt {
+    filter: contrast(1.1) brightness(0.9);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+}
