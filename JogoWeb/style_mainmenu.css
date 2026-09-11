@@ -1,0 +1,21 @@
+* {
+    font-family: "Press Start 2P";
+
+    padding: 0;
+    margin: 0;
+}
+
+.menu {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+
+    background-color: aquamarine;
+}
+
+.titulo {
+    font-size: 32px;
+    text-shadow: 2px 1px green;
+}
