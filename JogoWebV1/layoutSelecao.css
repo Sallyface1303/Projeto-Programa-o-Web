@@ -21,6 +21,27 @@ main{
     align-items: center;
 }
 
+button{
+    margin-top: 10px;
+    padding: 10px;
+    width: 150px;
+    height: 80px;
+    background-color: #0D0221;
+    border: 2px solid #C4157A;
+    justify-content: center;
+}
+
+button:hover{
+    margin-top: 10px;
+    padding: 10px;
+    width: 150px;
+    height: 80px;
+    background-color: #0D0221;
+    border: 2px solid #C4157A;
+    box-shadow: 0 0 6px #C4157A;
+    justify-content: center;
+}
+
 .menu{
     grid-area: menu;
     background-color : #0D0221;
