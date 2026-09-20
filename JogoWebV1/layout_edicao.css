@@ -122,3 +122,13 @@ button:hover{
     background-color: #B968F2;
     box-shadow: 0 0 8px #B968F2;
 }
+
+.input{
+    width: 350px;
+    font-family: 'VT323';
+    font-size: 20px;
+    color: #F5F0FF;
+    background-color: transparent;
+    border: 0px;
+    text-align: center;
+}

@@ -79,6 +79,17 @@ button:hover{
     align-items: center;
 }
 
+.divSelecao:hover{
+    display: flex;
+    flex-direction: row;
+    width: 250px;
+    height: 150px;
+    border: 2px solid #B968F2;
+    background-color: #1A0B3D;
+    justify-content: center;
+    align-items: center;
+}
+
 .divText{
     width: 80%;
     height: 1vh;
