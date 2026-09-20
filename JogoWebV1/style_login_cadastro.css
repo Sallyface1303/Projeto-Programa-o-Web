@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    /* Paleta de CenáriO */
+    --ceu-azul: #8ECFCF;
+    --grama-clara: #5A9E4A;
+    --grama-escura: #3E7A34;
+    --terra-clara: #6B4226;
+    --terra-escura: #4A2E1A;
+
+    /* Paleta de UI  */
+    --ui-texto: #FFF3D6;
+    --ui-conteiner: #3E2B1F;
+    --ui-destaque: #FFD233; 
+    --ui-erro: #D94F4F;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Press Start 2P', cursive; /* Fonte 16-bits */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--ceu-azul);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    /* Cenário de fundo: céu e grama */
+    background-image: linear-gradient(to bottom, var(--ceu-azul) 50%, var(--grama-clara) 50%, var(--grama-escura) 100%);
+    position: relative;
+}
+
+/* Filtro CRT*/
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%;
+    z-index: 999; 
+    pointer-events: none; 
+}
+
+/* ESTRUTURAS DOS QUADRADOS */
+.ui-container {
+    background-color: var(--ui-conteiner);
+    padding: 30px;
+    border-radius: 0px; 
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.6); 
+    width: 100%;
+    max-width: 550px; 
+    text-align: center;
+    border: 4px solid var(--terra-escura);
+    position: relative;
+    z-index: 10;
+}
+
+.ui-container h1 {
+    color: var(--ui-texto);
+    margin-bottom: 30px;
+    font-size: 20px;
+    /* Brilho CRT */
+    text-shadow: 2px 2px 0px #000, 0 0 10px rgba(255, 243, 214, 0.3);
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    color: var(--ui-destaque);
+    margin-bottom: 10px;
+    font-size: 10px; 
+    text-shadow: 1px 1px 0px #000;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 4px solid var(--terra-clara);
+    background-color: var(--ui-texto);
+    color: var(--ui-conteiner);
+    font-size: 12px;
+    outline: none;
+    border-radius: 0;
+}
+
+input:focus {
+    border-color: var(--ui-destaque);
+    background-color: #fff;
+}
+
+/* Botões 16-bits */
+.btn-primary {
+    background-color: var(--ui-destaque);
+    color: var(--ui-conteiner);
+    border: 4px solid #FFF;
+    padding: 15px;
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 15px;
+    box-shadow: 4px 4px 0px #000;
+    transition: 0.1s;
+    text-transform: uppercase;
+}
+
+.btn-primary:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px #000;
+}
+
+.link {
+    display: block;
+    margin-top: 25px;
+    color: var(--ceu-azul);
+    text-decoration: none;
+    font-size: 10px;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.link:hover {
+    color: var(--ui-texto);
+}
