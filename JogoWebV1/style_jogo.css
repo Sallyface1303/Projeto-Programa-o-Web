@@ -67,7 +67,7 @@ body {
 }
 
 .pause {
-    background-image: url('pausebtn.png');
+    background-image: url('imagens/pausebtn.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
