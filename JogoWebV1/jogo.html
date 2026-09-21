@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whack-a-Mole</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style_jogo.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playwrite+DE+LA+Guides&display=swap');
@@ -12,25 +13,33 @@
 <body>
     <div class="header">
         <button type="button" class="pause"></button>
-        <label class="pontuacao" id="pontTxt">PONTUAÇÃO: </label>
-        <a class="pontuacao" name="pontValue">*VALOR*</a>
+
+        <div class="pontDiv">
+            <label class="pontuacao" id="pontTxt">PONTUAÇÃO: </label>
+            <a class="pontuacao" name="pontValue">*VALOR*</a>
+        </div>
+        <div class="pontDiv">
+            <label class="pontuacao" id="timeTxt">TEMPO: </label>
+            <a class="pontuacao" name="timeValue">*VALOR*</a>
+        </div>
+
     </div>
     <div class="jogo">
         <div class="row">
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\topera-base.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="topera-base.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
         </div>
-        <div class="row, row2">
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\topera-base.png" class="holeimg"></button>
+        <div class="row row2">
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="topera-base.png" class="holeimg"></button>
         </div>
         <div class="row">
-            <button type="button" class="hole"><img src="\topera-base.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
-            <button type="button" class="hole"><img src="\buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="topera-base.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
+            <button type="button" class="hole"><img src="buraco.png" class="holeimg"></button>
         </div>
     </div>
 </body>
