@@ -1,0 +1,308 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ============================= */
+/* PALETA DE CORES                */
+/* ============================= */
+
+:root {
+    /* Paleta de Cenário */
+    --ceu-azul: #8ECFCF;
+    --grama-clara: #5A9E4A;
+    --grama-escura: #3E7A34;
+    --terra-clara: #6B4226;
+    --terra-escura: #4A2E1A;
+
+    /* Paleta de Interface */
+    --ui-texto: #FFF3D6;
+    --ui-conteiner: #3E2B1F;
+    --ui-destaque: #FFD233;
+    --ui-erro: #D94F4F;
+}
+
+/* ============================= */
+/* CONFIGURAÇÕES GERAIS           */
+/* ============================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', cursive;
+}
+
+body {
+    background-color: var(--ceu-azul);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
+    padding: 20px;
+
+    /* Cenário: céu e grama */
+    background-image: linear-gradient(
+        to bottom,
+        var(--ceu-azul) 50%,
+        var(--grama-clara) 50%,
+        var(--grama-escura) 100%
+    );
+
+    background-attachment: fixed;
+
+    position: relative;
+}
+
+/* ============================= */
+/* EFEITO CRT                     */
+/* ============================= */
+
+body::before {
+    content: "";
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background:
+        linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+        );
+
+    background-size: 100% 4px, 6px 100%;
+
+    z-index: 999;
+    pointer-events: none;
+}
+
+/* ============================= */
+/* PAINEL PRINCIPAL               */
+/* ============================= */
+
+.ranking-container {
+    background-color: var(--ui-conteiner);
+
+    width: 100%;
+    max-width: 850px;
+
+    padding: 30px;
+
+    border: 4px solid var(--terra-escura);
+    border-radius: 0;
+
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.6);
+
+    text-align: center;
+
+    position: relative;
+    z-index: 10;
+}
+
+/* ============================= */
+/* TÍTULO                         */
+/* ============================= */
+
+.ranking-container h1 {
+    color: var(--ui-destaque);
+
+    font-size: 20px;
+    line-height: 1.8;
+
+    margin-bottom: 15px;
+
+    text-shadow:
+        2px 2px 0 #000,
+        0 0 10px rgba(255, 243, 214, 0.3);
+}
+
+/* ============================= */
+/* SUBTÍTULO                      */
+/* ============================= */
+
+.ranking-subtitulo {
+    color: var(--ui-texto);
+
+    font-size: 10px;
+    line-height: 2;
+
+    margin-bottom: 25px;
+
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* ============================= */
+/* ÁREA DA TABELA                 */
+/* ============================= */
+
+.tabela-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 4px solid var(--terra-escura);
+
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ============================= */
+/* TABELA DE RANKING              */
+/* ============================= */
+
+.tabela-ranking {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    color: var(--ui-texto);
+
+    background-color: var(--ui-conteiner);
+
+    font-size: 10px;
+    text-align: center;
+}
+
+/* Cabeçalho */
+
+.tabela-ranking thead {
+    background-color: var(--grama-escura);
+}
+
+.tabela-ranking th {
+    color: var(--ui-destaque);
+
+    background-color: var(--grama-escura);
+
+    padding: 18px 12px;
+
+    border: 3px solid var(--terra-escura);
+
+    line-height: 1.8;
+
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* Células */
+
+.tabela-ranking td {
+    padding: 18px 12px;
+
+    border: 3px solid var(--terra-escura);
+
+    line-height: 1.8;
+
+    overflow-wrap: anywhere;
+}
+
+/* Linhas alternadas */
+
+.tabela-ranking tbody tr {
+    background-color: var(--ui-conteiner);
+}
+
+.tabela-ranking tbody tr:nth-child(even) {
+    background-color: var(--terra-clara);
+}
+
+/* Efeito ao passar o mouse */
+
+.tabela-ranking tbody tr:hover {
+    background-color: var(--grama-escura);
+}
+
+/* ============================= */
+/* COLUNA DE POSIÇÃO              */
+/* ============================= */
+
+.tabela-ranking .posicao {
+    color: var(--ui-destaque);
+
+    white-space: nowrap;
+}
+
+/* ============================= */
+/* RODAPÉ DO RANKING              */
+/* ============================= */
+
+.ranking-rodape {
+    color: var(--ui-texto);
+
+    font-size: 10px;
+    line-height: 2;
+
+    margin-top: 25px;
+
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* ============================= */
+/* LINK DE VOLTAR                 */
+/* ============================= */
+
+.link {
+    display: block;
+
+    margin-top: 25px;
+
+    color: var(--ceu-azul);
+
+    font-size: 10px;
+    line-height: 2;
+
+    text-decoration: none;
+
+    text-shadow: 1px 1px 0 #000;
+}
+
+.link:hover {
+    color: var(--ui-texto);
+}
+
+/* ============================= */
+/* RESPONSIVIDADE                 */
+/* ============================= */
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .ranking-container {
+        padding: 15px;
+    }
+
+    .ranking-container h1 {
+        font-size: 16px;
+    }
+
+    .ranking-subtitulo {
+        font-size: 8px;
+    }
+
+    .tabela-ranking {
+        font-size: 8px;
+    }
+
+    .tabela-ranking th,
+    .tabela-ranking td {
+        padding: 12px 6px;
+    }
+
+    .ranking-rodape {
+        font-size: 8px;
+    }
+
+    .link {
+        font-size: 8px;
+    }
+}
