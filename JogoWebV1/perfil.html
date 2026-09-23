@@ -1,34 +1,75 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="layout_perfil.css">
-	<link rel="stylesheet" href="style.css">
-	<link rel="icon" href="imagens/topeira_capacete.png">
-	<title>Pefil</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Meu Perfil</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_perfil.css">
+
+    <link rel="icon" href="imagens/topeira_capacete.png">
 </head>
+
 <body>
     <div class="conteiner">
         <div class="menu">
-            <a href="main_menu" class="a">ACERTE A TOUPEIRA</a>
+            <h1 class="h1">WHACK-A-MOLE</h1>
+            <div class="lineBottom"></div>
         </div>
+
+        <header>
+            <div class="line"></div>
+            <h1>MEU PERFIL</h1>
+            <div class="line"></div>
+        </header>
+
         <main>
-            <h1>INFORMAÇÕES DO USUÁRIO</h1>
-            <img src="imagens/fotoPerfil.png" alt="foto perfil">
-            <p>Nome: </p>
-            <p>Nome de usuário:</p>
-            <p>Email:</p>
-            <p>Telefone:</p>
-            <p>Idade:</p>
-            <p>CPF: (visível apenas para o dono da conta)</p>
+            <div class="perfil">
+                <div class="divImg">
+                    <img src="imagens/fotoPerfil.png" alt="Foto de perfil">
+                    <h2>SEU NOME</h2>
+                    <p>@seu_usuario</p>
+                </div>
+
+                <div class="divInfo">
+                    <div class="info">
+                        <p class="tituloInfo">NOME</p>
+                        <p>Seu Nome</p>
+                    </div>
+
+                    <div class="info">
+                        <p class="tituloInfo">NOME DE USUÁRIO</p>
+                        <p>seu_usuario</p>
+                    </div>
+
+                    <div class="info">
+                        <p class="tituloInfo">E-MAIL</p>
+                        <p>seuemail@email.com</p>
+                    </div>
+
+                    <div class="info">
+                        <p class="tituloInfo">TELEFONE</p>
+                        <p>(00) 00000-0000</p>
+                    </div>
+                </div>
+
+                <div class="botoes">
+                    <button type="button" onclick="location.href='edicao.html'">EDITAR PERFIL</button>
+
+                    <button type="button"
+                        onclick="location.href='score.html'">
+                        MEUS SCORES
+                    </button>
+                </div>
+
+                <a href="main_menu.html" class="voltar">
+                    &lt; VOLTAR AO MENU
+                </a>
+            </div>
         </main>
-        <nav>
-            <ul>
-                <li><a href="selecao.html">Link</a></li>
-                <li><a href="score.html">Recordes</a></li>
-            </ul>
-        </nav>
     </div>
 </body>
 </html>
