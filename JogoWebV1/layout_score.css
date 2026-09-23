@@ -1,3 +1,7 @@
+*{
+    margin: 0;
+}
+
 .conteiner{
     position: relative;
     display: grid;
@@ -107,22 +111,4 @@ main{
     height: 2px;
     background-color: #B968F2;
     box-shadow: 0 0 8px #B968F2;
-}
-
-button {
-    width: 300px;
-    height: 55px;
-    margin-top: 70px;
-    background-color: #1A0B3D;
-    border: 2px solid #B968F2;
-    border-radius: 0;
-    color: #F5F0FF;
-    font-family: 'Press Start 2P';
-    font-size: 10px;
-}
-
-button:hover{
-    background-color: #0D0221;
-    border: 2px solid #C4157A;
-    box-shadow: 0 0 6px #C4157A;
 }

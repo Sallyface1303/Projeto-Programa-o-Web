@@ -1,3 +1,7 @@
+*{
+    margin: 0;
+}
+
 .conteiner{
     position: relative;
     display: grid;
@@ -31,25 +35,14 @@ main{
     align-items: center;
 }
 
-.divButtons {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-}
-
 button{
-    margin: 10px 10px 0;
+    margin-top: 10px;
     padding: 10px;
     width: 150px;
     height: 80px;
-    justify-content: center;
     background-color: #0D0221;
-    
     border: 2px solid #C4157A;
-
-    color: aliceblue;
-    font-family: 'VT323';
-    font-size: larger;
+    justify-content: center;
 }
 
 button:hover{
