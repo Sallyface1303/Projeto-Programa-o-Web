@@ -1,74 +1,87 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-    /* Paleta de CenáriO */
-    --ceu-azul: #8ECFCF;
-    --grama-clara: #5A9E4A;
-    --grama-escura: #3E7A34;
-    --terra-clara: #6B4226;
-    --terra-escura: #4A2E1A;
-
-    /* Paleta de UI  */
-    --ui-texto: #FFF3D6;
-    --ui-conteiner: #3E2B1F;
-    --ui-destaque: #FFD233; 
-    --ui-erro: #D94F4F;
+    /* Paleta Retro Neon */
+    --bg-fundo: #0D0221;
+    --bg-input: #1A0B3D;
+    --neon-rosa: #C4157A;
+    --neon-roxo: #B968F2;
+    --texto-claro: #F5F0FF;
 }
 
 * {
     box-sizing: border-box;
-    font-family: 'Press Start 2P', cursive; /* Fonte 16-bits */
+    font-family: 'Press Start 2P', cursive;
     margin: 0;
     padding: 0;
 }
 
 body {
-    background-color: var(--ceu-azul);
+    background-color: var(--bg-fundo);
+    color: var(--texto-claro);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    /* Cenário de fundo: céu e grama */
-    background-image: linear-gradient(to bottom, var(--ceu-azul) 50%, var(--grama-clara) 50%, var(--grama-escura) 100%);
     position: relative;
 }
 
-/* Filtro CRT*/
-body::before {
-    content: " ";
-    display: block;
+/*FILTRO CRT */
+body::after {
+    content: "";
     position: fixed;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 4px, 6px 100%;
-    z-index: 999; 
-    pointer-events: none; 
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 4px
+    );
+    z-index: 9999;
 }
 
-/* ESTRUTURAS DOS QUADRADOS */
+body {
+    filter: contrast(1.1) brightness(0.9);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+/* PARTE PRINCIPAL */
 .ui-container {
-    background-color: var(--ui-conteiner);
-    padding: 30px;
-    border-radius: 0px; 
-    box-shadow: 10px 10px 0px rgba(0,0,0,0.6); 
+    background-color: var(--bg-fundo);
+    padding: 40px 30px;
+    border-radius: 8px; 
+    /* Brilho neon roxo no contorno do painel */
+    box-shadow: 0 0 15px var(--neon-roxo), inset 0 0 20px rgba(185, 104, 242, 0.2); 
     width: 100%;
-    max-width: 550px; 
+    max-width: 550px;
     text-align: center;
-    border: 4px solid var(--terra-escura);
+    border: 4px solid var(--neon-roxo);
     position: relative;
     z-index: 10;
 }
 
+/* Alarga a caixa se for a tela de cadastro (que tem a grid) */
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.ui-container:has(.grid-2-cols) {
+    max-width: 750px; 
+}
+
 .ui-container h1 {
-    color: var(--ui-texto);
+    color: var(--neon-roxo);
     margin-bottom: 30px;
     font-size: 20px;
-    /* Brilho CRT */
-    text-shadow: 2px 2px 0px #000, 0 0 10px rgba(255, 243, 214, 0.3);
+    text-shadow: 0 0 8px var(--neon-roxo);
     line-height: 1.5;
 }
+
 
 .form-group {
     margin-bottom: 20px;
@@ -77,57 +90,82 @@ body::before {
 
 label {
     display: block;
-    color: var(--ui-destaque);
+    color: var(--neon-rosa);
     margin-bottom: 10px;
-    font-size: 10px; 
-    text-shadow: 1px 1px 0px #000;
+    font-size: 10px;
+    text-shadow: 0 0 5px var(--neon-rosa);
 }
 
 input {
     width: 100%;
     padding: 12px;
-    border: 4px solid var(--terra-clara);
-    background-color: var(--ui-texto);
-    color: var(--ui-conteiner);
+    border: 2px solid var(--neon-roxo);
+    background-color: var(--bg-input);
+    color: var(--texto-claro);
     font-size: 12px;
     outline: none;
     border-radius: 0;
+    text-align: center;
+    transition: 0.2s;
 }
 
 input:focus {
-    border-color: var(--ui-destaque);
-    background-color: #fff;
+    border-color: var(--neon-rosa);
+    box-shadow: 0 0 10px var(--neon-rosa);
 }
 
-/* Botões 16-bits */
+/*BOTÕES E LINKS */
 .btn-primary {
-    background-color: var(--ui-destaque);
-    color: var(--ui-conteiner);
-    border: 4px solid #FFF;
+    background-color: var(--bg-fundo);
+    color: var(--neon-rosa);
+    border: 2px solid var(--neon-rosa);
     padding: 15px;
     width: 100%;
     font-size: 14px;
     cursor: pointer;
     margin-top: 15px;
-    box-shadow: 4px 4px 0px #000;
-    transition: 0.1s;
+    transition: 0.2s;
     text-transform: uppercase;
+    text-shadow: 0 0 5px var(--neon-rosa);
 }
 
-.btn-primary:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px #000;
+.btn-primary:hover {
+    background-color: var(--neon-rosa);
+    color: #FFF;
+    box-shadow: 0 0 15px var(--neon-rosa);
+    text-shadow: none;
 }
 
 .link {
     display: block;
     margin-top: 25px;
-    color: var(--ceu-azul);
+    color: var(--neon-roxo);
     text-decoration: none;
     font-size: 10px;
-    text-shadow: 1px 1px 0px #000;
+    text-shadow: 0 0 5px var(--neon-roxo);
+    transition: 0.2s;
 }
 
 .link:hover {
-    color: var(--ui-texto);
+    color: var(--texto-claro);
+    text-shadow: 0 0 10px var(--texto-claro);
+}
+
+/*ÍCONE DE EDIÇÃO DE PERFIL (Engrenagem) */
+.icon-edicao {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    font-size: 28px;
+    color: var(--neon-roxo);
+    text-decoration: none;
+    text-shadow: 0 0 10px var(--neon-roxo);
+    transition: transform 0.2s, color 0.2s, text-shadow 0.2s;
+    z-index: 1000;
+}
+
+.icon-edicao:hover {
+    color: var(--texto-claro);
+    transform: scale(1.2);
+    text-shadow: 0 0 15px var(--texto-claro), 0 0 20px var(--neon-roxo);
 }
