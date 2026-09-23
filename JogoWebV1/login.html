@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acerte a Topeira - Cadastro</title>
-    <link rel="stylesheet" href="style_login_cadastro.css">
+    <title>Acerte a Toupeira - Login</title>
+    <link rel="stylesheet" href="style_cadastro.css">
 </head>
 <body>
+
+    <!-- Ícone de Edição de Perfil no canto superior direito -->
+    <a href="edicao.html" class="icon-edicao" title="Editar Perfil">⚙️</a>
 
     <div class="ui-container">
         <h1>ACERTE A<br>TOUPEIRA</h1>
         
-        <form action="main_menu.html"></form>
+        <!-- Correção: A tag form agora envolve os inputs corretamente -->
+        <form action="selecao.html">
             <div class="form-group">
                 <label for="login">USUARIO OU EMAIL</label>
                 <input type="text" id="login" name="login" required>
