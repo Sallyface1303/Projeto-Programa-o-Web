@@ -28,7 +28,7 @@ body {
 #divToupeira {
     position: absolute;
     z-index: 0;
-    bottom: 77.7vh;
+    bottom: 82vh;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
