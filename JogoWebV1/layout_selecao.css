@@ -35,17 +35,20 @@ main{
     align-items: center;
 }
 
-button{
+.button{
     margin-top: 10px;
     padding: 10px;
-    width: 150px;
-    height: 80px;
+    width: 135px;
+    height: 65px;
     background-color: #0D0221;
     border: 2px solid #C4157A;
+    display: flex;
     justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-button:hover{
+.button:hover{
     box-shadow: 0 0 6px #C4157A;
 }
 
@@ -92,7 +95,6 @@ button:hover{
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: bottom;
     padding-top: 10px;
 }
 

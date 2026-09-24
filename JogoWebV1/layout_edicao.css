@@ -60,7 +60,8 @@ img{
     border-radius: 50%;
 }
 
-button{
+.buttonSave{
+    display: flex;
     margin-top: 10px;
     padding: 10px;
     width: 125px;
@@ -68,9 +69,10 @@ button{
     background-color: #0D0221;
     border: 2px solid #C4157A;
     justify-content: center;
+    align-items: center;
 }
 
-button:hover{
+.buttonSave:hover{
     box-shadow: 0 0 6px #C4157A;
 }
 
