@@ -14,14 +14,14 @@
     overflow: hidden;
 }
 
-.conteiner::before{
+.conteiner::before {
     position: absolute;
-    content: " ";
+    content: "";
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(rgba(0, 255, 144, 0.1), 0.1em, transparent 0.1em);
+    background: linear-gradient(rgba(0, 255, 144, 0.1) 50%, transparent 50%);
     background-size: 100% 0.2em;
     pointer-events: none;
 }
@@ -94,12 +94,6 @@ button:hover{
     justify-content: center;
     align-items: bottom;
     padding-top: 10px;
-}
-
-.line{
-    width: 300px;
-    height: 1px;
-    background: linear-gradient(to right, transparent, #C4157A, transparent);
 }
 
 .lineBottom{
