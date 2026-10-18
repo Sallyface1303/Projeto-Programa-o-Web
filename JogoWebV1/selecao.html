@@ -17,18 +17,19 @@
        <main>
            <div class="divText"><p class="p2">Selecione o modo</p></div>
            <div class="divModo">
-               <button class="divSelecao"><span class="p1">NORMAL</span></button>
-               <button class="divSelecao"><span class="p1">EXPLOSIVO</span></button>
+               <button type="button" class="divSelecao" data-grupo="modo" data-valor="normal" aria-pressed="false"><span class="p1">NORMAL</span></button>
+               <button type="button" class="divSelecao" data-grupo="modo" data-valor="explosivo" aria-pressed="false"><span class="p1">EXPLOSIVO</span></button>
            </div>
            <div class="divText"><p class="p2">Selecione a dificuldade</p></div>
            <div class="divModo">
-               <button class="divSelecao"><span class="p1">FÁCIL</span></button>
-               <button class="divSelecao"><span class="p1">MÉDIO</span></button>
-               <button class="divSelecao"><span class="p1">DIFÍCIl</span></button>
+               <button type="button" class="divSelecao" data-grupo="dificuldade" data-valor="facil" aria-pressed="false"><span class="p1">FÁCIL</span></button>
+               <button type="button" class="divSelecao" data-grupo="dificuldade" data-valor="medio" aria-pressed="false"><span class="p1">MÉDIO</span></button>
+               <button type="button" class="divSelecao" data-grupo="dificuldade" data-valor="dificil" aria-pressed="false"><span class="p1">DIFÍCIL</span></button>
            </div>
-           <a href="jogo.html" class="button">Jogar</a>
+           <a href="jogo.html" class="button" id="btnJogar">Jogar</a>
        </main>
     </div>
 
+    <script src="selecao.js"></script>
 </body>
 </html>

@@ -12,6 +12,14 @@
             margin-top: 30px;
             margin-bottom: 30px;
         }
+        .erro-senha {
+            margin-top: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            line-height: 1.5;
+            color: #FF4D6D;
+            text-shadow: 0 0 5px #FF4D6D;
+        }
         .grid-2-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -24,7 +32,7 @@
     <div class="ui-container">
         <h1>NOVO JOGADOR</h1>
         
-        <form action="login.html">
+        <form action="login.html" id="formCadastro">
             <div class="form-group">
                 <label for="nome">NOME COMPLETO</label>
                 <input type="text" id="nome" name="nome" required>
@@ -70,6 +78,7 @@
                 <div class="form-group">
                     <label for="confirma_senha">CONFIRMAR SENHA</label>
                     <input type="password" id="confirma_senha" name="confirma_senha" required>
+                    <p class="erro-senha" id="erroSenha" role="alert" hidden></p>
                 </div>
             </div>
 
@@ -79,5 +88,6 @@
         <a href="titulo.html" class="link">VOLTAR</a>
     </div>
 
+    <script src="cadastro.js"></script>
 </body>
 </html>
