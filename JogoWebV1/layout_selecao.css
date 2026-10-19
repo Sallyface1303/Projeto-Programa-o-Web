@@ -104,3 +104,28 @@ main{
     background-color: #B968F2;
     box-shadow: 0 0 8px #B968F2;
 }
+
+
+
+.divSelecao.selecionado,
+.divSelecao[aria-pressed="true"] {
+    background-color: #C4157A;
+    border-color: #FFFFFF; 
+    
+   
+    box-shadow: 0 0 25px #C4157A, inset 0 0 10px rgba(255, 255, 255, 0.4); 
+    
+    
+    transform: scale(1.05); 
+}
+
+
+.divSelecao.selecionado .p1,
+.divSelecao[aria-pressed="true"] .p1 {
+    color: #FFFFFF;
+    text-shadow: 2px 2px 0px #0D0221;
+}
+
+.divSelecao {
+    transition: all 0.2s ease-in-out;
+}
