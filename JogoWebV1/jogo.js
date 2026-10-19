@@ -99,8 +99,8 @@ const VELOCIDADE_DIFICULDADE = {
     // Médio: Aparece a cada 1.4 segundos, fica na tela por 1.1 segundos (ritmo dinâmico, mas justo)
     medio:   { intervalo: 1400, exposicao: 1100 },
     
-    // Difícil: Aparece a cada 0.85 segundos, fica na tela por 0.7 segundos (modo frenético arcade)
-    dificil: { intervalo: 850,  exposicao: 700 }
+    // Difícil: Aparece a cada 1 segundos, fica na tela por 0.85 segundos (modo frenético arcade)
+    dificil: { intervalo: 1000,  exposicao: 850 }
 };
 
 function obterElementoPontuacao() {
@@ -138,13 +138,18 @@ containerTabuleiro.addEventListener('mousedown', function (evento) {
 function processarCliqueBuraco(buraco, img) {
     const srcAtual = img.getAttribute('src') || '';
 
-    if (srcAtual.includes('buraco.png')) {
-        registrarFalha(buraco);
+    if (buraco.dataset.armadilha === 'true') {
+        processarExplosao(buraco, img);
         return;
     }
 
-    if (buraco.dataset.armadilha === 'true') {
-        processarExplosao(buraco, img);
+    if (buraco.dataset.bombaComum === 'true') {
+        processarBombaComum(buraco, img);
+        return;
+    }
+
+    if (srcAtual.includes('buraco.png')) {
+        registrarFalha(buraco);
         return;
     }
 
@@ -153,7 +158,7 @@ function processarCliqueBuraco(buraco, img) {
         estadoPartida.pontuacao += ptsCapacete;
         tocarSomArcade(320, 'square', 0.08);
 
-        img.src = 'imagens/topera-base.png';
+        img.src = 'imagens/topeira_base2.png';
         aplicarEfeitoBuraco(buraco, 'hit-capacete');
         mostrarTextoFlutuante(buraco, 'CAPACETE! +' + ptsCapacete, 'bonus');
         atualizarPlacarDOM();
@@ -176,7 +181,7 @@ function processarCliqueBuraco(buraco, img) {
         return;
     }
 
-    if (srcAtual.includes('topera-base.png')) {
+    if (srcAtual.includes('topera-base.png') || srcAtual.includes('topeira_base2.png')) {
         aumentarCombo();
         const ptsBase = 100 * estadoPartida.combo;
         estadoPartida.pontuacao += ptsBase;
@@ -234,6 +239,35 @@ function processarExplosao(buraco, img) {
     }
 }
 
+function processarBombaComum(buraco, img) {
+    if (buraco.dataset.bombaComum !== 'true') return;
+
+    estadoPartida.acertos++;
+    estadoPartida.acertosSeguidos = 0;
+    estadoPartida.combo = 1;
+    tocarSomArcade(760, 'triangle', 0.1);
+    esconderToupeira(buraco, img);
+    aplicarEfeitoBuraco(buraco, 'hit-capacete');
+    mostrarTextoFlutuante(buraco, 'DESARMADA!', 'bonus');
+    atualizarPlacarDOM();
+    salvarPontuacaoLocal();
+}
+
+function explodirBombaComum(buraco, img) {
+    if (buraco.dataset.bombaComum !== 'true') return;
+
+    estadoPartida.erros++;
+    estadoPartida.acertosSeguidos = 0;
+    estadoPartida.combo = 1;
+    estadoPartida.pontuacao = Math.max(0, estadoPartida.pontuacao - 150);
+    tocarSomArcade(90, 'sawtooth', 0.2);
+    esconderToupeira(buraco, img);
+    aplicarEfeitoBuraco(document.body, 'tremor-explosao');
+    mostrarTextoFlutuante(buraco, 'BOOM! -150', 'negativo');
+    atualizarPlacarDOM();
+    salvarPontuacaoLocal();
+}
+
 // MECÂNICA STRICTA DE 1 TOUPEIRA
 function esconderTodasToupeiras() {
     const buracos = document.querySelectorAll('.hole');
@@ -251,6 +285,7 @@ function esconderToupeira(buraco, img) {
         delete buraco.dataset.timerId;
     }
     delete buraco.dataset.armadilha;
+    delete buraco.dataset.bombaComum;
     buraco.classList.remove('armadilha-ativa');
     img.src = 'imagens/buraco.png';
     img.alt = 'Buraco';
@@ -315,20 +350,43 @@ function sortearToupeira() {
 
     // Probabilidades separadas por Modo para garantir que o capacete aparece sempre
     if (configuracao.modo === 'explosivo') {
-        if (sorteio < 0.20) {
-            img.src = 'imagens/topera-nerd.png';
-            img.alt = 'Toupeira Explosiva';
-            escolhido.dataset.armadilha = 'true';
-            escolhido.classList.add('armadilha-ativa');
-        } else if (sorteio < 0.40) {
-            img.src = 'imagens/topeira_capacete.png';
-            img.alt = 'Toupeira de Capacete';
-        } else if (sorteio < 0.50) {
-            img.src = 'imagens/topera-nerd.png';
-            img.alt = 'Toupeira Bônus';
+        if (configuracao.dificuldade === 'dificil'){
+            if (sorteio < 0.10) {       // 10 de chance
+                img.src = 'imagens/bomba.png';
+                img.alt = 'Bomba';
+                escolhido.dataset.bombaComum = 'true';
+                escolhido.classList.add('armadilha-ativa');
+            } else if (sorteio < 0.30) {        // 20 de chance
+                img.src = 'imagens/mina_terrestre.png';
+                img.alt = 'Mina Explosiva';
+                escolhido.dataset.armadilha = 'true';
+                escolhido.classList.add('armadilha-ativa');
+            } else if (sorteio < 0.55) {        // 25 de chance
+                img.src = 'imagens/topeira_capacete.png';
+                img.alt = 'Toupeira de Capacete';
+            } else if (sorteio < 0.65) {        // 10 de chance
+                img.src = 'imagens/topera-nerd.png';
+                img.alt = 'Toupeira Bônus';
+            } else {                    // 35 de chance
+                img.src = 'imagens/topera-base.png';
+                img.alt = 'Toupeira';
+            }
         } else {
-            img.src = 'imagens/topera-base.png';
-            img.alt = 'Toupeira';
+            if (sorteio < 0.20) {
+                img.src = 'imagens/mina_terrestre.png';
+                img.alt = 'Mina Explosiva';
+                escolhido.dataset.armadilha = 'true';
+                escolhido.classList.add('armadilha-ativa');
+            } else if (sorteio < 0.40) {
+                img.src = 'imagens/topeira_capacete.png';
+                img.alt = 'Toupeira de Capacete';
+            } else if (sorteio < 0.50) {
+                img.src = 'imagens/topera-nerd.png';
+                img.alt = 'Toupeira Bônus';
+            } else {
+                img.src = 'imagens/topera-base.png';
+                img.alt = 'Toupeira';
+            }
         }
     } else {
         // MODO NORMAL (Sem armadilhas)
@@ -344,10 +402,13 @@ function sortearToupeira() {
         }
     }
 
+    const eBombaComum = escolhido.dataset.bombaComum === 'true';
     const tempoExp = (VELOCIDADE_DIFICULDADE[configuracao.dificuldade] || VELOCIDADE_DIFICULDADE.facil).exposicao;
 
     escolhido.dataset.timerId = setTimeout(function () {
-        if (!img.getAttribute('src').includes('buraco.png')) {
+        if (eBombaComum && escolhido.dataset.bombaComum === 'true') {
+            explodirBombaComum(escolhido, img);
+        } else if (!img.getAttribute('src').includes('buraco.png')) {
             esconderToupeira(escolhido, img);
         }
     }, tempoExp);
@@ -407,7 +468,7 @@ function abrirModal(titulo, podeContinuar) {
     if (modalStats) {
         modalStats.innerHTML = 
             'ACERTOS: ' + estadoPartida.acertos + '<br>' +
-            'ERROS (VAZIO/BOMBA): ' + estadoPartida.erros + '<br>' +
+            'ERROS (VAZIO/EXPLOSÕES): ' + estadoPartida.erros + '<br>' +
             'MAIOR COMBO: x' + estadoPartida.melhorCombo;
     }
 

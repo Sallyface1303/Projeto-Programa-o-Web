@@ -162,7 +162,7 @@ body {
 }
 
 
-.armadilha-ativa .holeimg { filter: drop-shadow(0 0 20px #FF0033) hue-rotate(310deg); }
+.armadilha-ativa .holeimg { filter: drop-shadow(0 0 20px #FF0033); }
 .hit-acerto .holeimg { filter: drop-shadow(0 0 20px #39FF14) brightness(1.3); }
 .hit-capacete .holeimg { filter: drop-shadow(0 0 20px #FFD233) contrast(1.5); }
 .hit-erro .holeimg { filter: drop-shadow(0 0 20px #FF0000); }
