@@ -8,21 +8,25 @@
     <link rel="stylesheet" href="style_jogo.css">
     <link rel="icon" href="imagens/topeira_capacete.png">
 </head>
-<body>
-    <!-- HEADER: Agora só tem navegação, com botões bem maiores -->
+<body class="pagina-jogo">
+    <!-- HEADER: pause, cronômetro da partida e navegação -->
     <header class="header">
         <div class="nav-controles">
-            <button type="button" class="pause" title="Pausar"></button>
+            <button type="button" class="pause" id="btnPause" title="Pausar (P)" aria-label="Pausar" aria-pressed="false"></button>
+            <div class="header-tempo">
+                <span class="hud-titulo">TEMPO</span>
+                <span class="hud-valor destaque-tempo" id="timeValue" role="timer">60s</span>
+            </div>
             <a href="selecao.html" class="btn-topo">&lt; MODOS</a>
             <a href="main_menu.html" class="btn-topo">MENU</a>
         </div>
     </header>
 
-    <!-- LAYOUT ARCADE: 3 Colunas (Estatísticas | Tabuleiro | Tempo) -->
+    <!-- LAYOUT ARCADE: 3 colunas (Placar | Tabuleiro | Partida) -->
     <div class="layout-arcade">
-        
+
         <!-- PAINEL ESQUERDO: Pontuação e Combo -->
-        <aside class="hud-lateral">
+        <aside class="hud-lateral" aria-label="Placar">
             <div class="hud-caixa">
                 <span class="hud-titulo">PONTOS</span>
                 <span class="hud-valor" id="pontValue">0</span>
@@ -33,30 +37,38 @@
             </div>
         </aside>
 
-        <!-- CENTRO: Tabuleiro num quadrado delimitado -->
+        <!-- CENTRO: Tabuleiro -->
         <main class="jogo-container">
             <div class="jogo" id="tabuleiro"></div>
         </main>
 
-        <!-- PAINEL DIREITO: Tempo -->
-        <aside class="hud-lateral">
+        <!-- PAINEL DIREITO: Informações da partida -->
+        <aside class="hud-lateral" aria-label="Partida">
             <div class="hud-caixa">
-                <span class="hud-titulo">TEMPO</span>
-                <span class="hud-valor destaque-tempo" id="timeValue">60s</span>
+                <span class="hud-titulo">MODO</span>
+                <span class="hud-valor pequeno" id="modoValue">-</span>
+            </div>
+            <div class="hud-caixa">
+                <span class="hud-titulo">NÍVEL</span>
+                <span class="hud-valor pequeno" id="nivelValue">-</span>
+            </div>
+            <div class="hud-caixa">
+                <span class="hud-titulo">META</span>
+                <span class="hud-valor pequeno destaque-combo" id="metaValue">-</span>
             </div>
         </aside>
-        
+
     </div>
 
-    <!-- MODAL DE PAUSE E FIM DE JOGO (Com letras grandes) -->
-    <div class="modal-jogo" id="modalFimPause" hidden>
-        <div class="modal-card">
+    <!-- MODAL DE PAUSE E FIM DE JOGO (Retro Neon) -->
+    <div class="modal-jogo" id="modalFimPause" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" hidden>
+        <div class="modal-card" id="modalCard">
             <h1 id="modalTitulo">JOGO PAUSADO</h1>
-            <p id="modalSubtitulo">PONTUAÇÃO ATUAL: 0</p>
-            
-            <div class="modal-estatisticas" id="modalStats">
+            <p id="modalSubtitulo"></p>
+
+            <dl class="modal-estatisticas" id="modalStats">
                 <!-- Estatísticas inseridas pelo JS -->
-            </div>
+            </dl>
 
             <div class="modal-acoes">
                 <button type="button" class="btn-acao primario" id="btnContinuar">CONTINUAR</button>
@@ -68,6 +80,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="jogo.js"></script>
 </body>
 </html>

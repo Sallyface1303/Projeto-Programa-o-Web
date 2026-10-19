@@ -1,8 +1,25 @@
 // =========================================================
-// PARTE DO MEMBRO 1: DESENHO E CONFIGURAÇÃO
+// ACERTE A TOUPEIRA
+// Depende de config.js (lerConfiguracao), carregado antes.
+//
+//   1. Parâmetros do jogo
+//   2. Estado da partida
+//   3. Tabuleiro (desenho e tamanho dos buracos)
+//   4. Toupeiras (aparecer, expirar, congelar)
+//   5. Regras (cliques, pontos, combo, explosões)
+//   6. Ciclo da partida (iniciar, pausar, encerrar, reiniciar)
+//   7. Modal (pausa / fim de jogo)
+//   8. Eventos
 // =========================================================
-const CHAVE_CONFIG = 'configuracaoJogo';
-const PADRAO = { modo: 'normal', dificuldade: 'facil' };
+
+// ---------------------------------------------------------
+// 1. PARÂMETROS DO JOGO
+// ---------------------------------------------------------
+const configuracao = lerConfiguracao();
+
+const DURACAO_PARTIDA = 60;   // segundos
+const TEMPO_MAXIMO = 99;      // limite do bônus de tempo
+const TEMPO_CRITICO = 10;     // o cronômetro fica vermelho a partir daqui
 
 const LAYOUTS = {
     facil:   [3, 3],
@@ -10,33 +27,89 @@ const LAYOUTS = {
     dificil: [4, 5, 4, 5]
 };
 
-function lerConfiguracao() {
-    let salvo = {};
-    try {
-        salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG)) || {};
-    } catch (e) {
-        salvo = {};
+const GAP_BURACO = 12;        // px entre buracos
+const TAMANHO_MIN_BURACO = 48;
+const TAMANHO_MAX_BURACO = 200;
+
+// Fácil: aparece a cada 2s e fica 1.7s | Médio: 1.4s / 1.1s | Difícil: 1s / 0.85s
+const VELOCIDADE_DIFICULDADE = {
+    facil:   { intervalo: 2000, exposicao: 1700 },
+    medio:   { intervalo: 1400, exposicao: 1100 },
+    dificil: { intervalo: 1000, exposicao: 850 }
+};
+
+// Pontuação mínima ao fim do tempo para vencer a partida
+const META_PONTOS = {
+    facil:   2500,
+    medio:   4000,
+    dificil: 6000
+};
+
+const ROTULO_MODO = { normal: 'NORMAL', explosivo: 'EXPLOSIVO' };
+const ROTULO_NIVEL = { facil: 'FÁCIL', medio: 'MÉDIO', dificil: 'DIFÍCIL' };
+
+// Tudo o que pode aparecer num buraco
+const TIPOS = {
+    base:     { img: 'topera-base.png',      alt: 'Toupeira' },
+    base2:    { img: 'topeira_base2.png',    alt: 'Toupeira sem capacete' },
+    capacete: { img: 'topeira_capacete.png', alt: 'Toupeira de Capacete' },
+    nerd:     { img: 'topera-nerd.png',      alt: 'Toupeira Bônus' },
+    bomba:    { img: 'bomba.png',            alt: 'Bomba',          perigo: true },
+    mina:     { img: 'mina_terrestre.png',   alt: 'Mina Explosiva', perigo: true }
+};
+
+// Tabelas de sorteio: [limite acumulado, tipo]. Se a dificuldade não tiver
+// tabela própria, usa a "padrao" do modo.
+const PROBABILIDADES = {
+    normal: {
+        padrao: [[0.20, 'capacete'], [0.35, 'nerd'], [Infinity, 'base']]
+    },
+    explosivo: {
+        padrao:  [[0.20, 'mina'], [0.40, 'capacete'], [0.50, 'nerd'], [Infinity, 'base']],
+        dificil: [[0.10, 'bomba'], [0.30, 'mina'], [0.55, 'capacete'], [0.65, 'nerd'], [Infinity, 'base']]
     }
-    const config = { ...PADRAO, ...salvo };
-    if (!LAYOUTS[config.dificuldade]) config.dificuldade = PADRAO.dificuldade;
-    if (config.modo !== 'normal' && config.modo !== 'explosivo') config.modo = PADRAO.modo;
-    return config;
-}
+};
 
-const configuracao = lerConfiguracao();
+// ---------------------------------------------------------
+// 2. ESTADO DA PARTIDA
+// ---------------------------------------------------------
+const estado = {
+    fase: 'rodando',          // 'rodando' | 'pausado' | 'encerrado'
+    pontuacao: 0,
+    combo: 1,
+    acertosSeguidos: 0,
+    melhorCombo: 1,
+    acertos: 0,
+    erros: 0,
+    tempoRestante: DURACAO_PARTIDA,
+    intervaloSpawn: null,
+    intervaloTempo: null,
+    audioCtx: null
+};
 
+// Timers de expiração das toupeiras visíveis: buraco -> { timerId, fim, restante }
+const expiracoes = new Map();
+
+const tabuleiro = document.getElementById('tabuleiro');
+const elPontuacao = document.getElementById('pontValue');
+const elTempo = document.getElementById('timeValue');
+const elCombo = document.getElementById('comboValue');
+const btnPause = document.getElementById('btnPause');
+
+// ---------------------------------------------------------
+// 3. TABULEIRO
+// ---------------------------------------------------------
 function desenharTabuleiro() {
-    const tabuleiro = document.getElementById('tabuleiro');
     const linhas = LAYOUTS[configuracao.dificuldade];
     tabuleiro.innerHTML = '';
     tabuleiro.dataset.modo = configuracao.modo;
     tabuleiro.dataset.dificuldade = configuracao.dificuldade;
+    tabuleiro.style.setProperty('--gap-buraco', GAP_BURACO + 'px');
 
     let indice = 0;
     linhas.forEach(function (quantidade) {
         const linha = document.createElement('div');
         linha.className = 'row';
-        if (quantidade > linhas[0]) linha.classList.add('row2');
 
         for (let i = 0; i < quantidade; i++) {
             const buraco = document.createElement('button');
@@ -58,237 +131,216 @@ function desenharTabuleiro() {
     ajustarTamanhoBuracos();
 }
 
+// O tamanho dos buracos sai do espaço realmente disponível no tabuleiro
+// (largura E altura), então o jogo sempre cabe na tela.
 function ajustarTamanhoBuracos() {
-    const tabuleiro = document.getElementById('tabuleiro');
     const linhas = LAYOUTS[configuracao.dificuldade];
     const maxColunas = Math.max(...linhas);
-    const porLargura = (window.innerWidth - 40) / maxColunas - 10;
-    const porAltura = tabuleiro.clientHeight / linhas.length - 20;
-    const tamanho = Math.max(60, Math.min(200, porLargura, porAltura));
+    const largura = tabuleiro.clientWidth;
+    const altura = tabuleiro.clientHeight;
+    if (!largura || !altura) return;
+
+    const porLargura = (largura - (maxColunas - 1) * GAP_BURACO) / maxColunas;
+    const porAltura = (altura - (linhas.length - 1) * GAP_BURACO) / linhas.length;
+    const tamanho = Math.max(TAMANHO_MIN_BURACO, Math.min(TAMANHO_MAX_BURACO, porLargura, porAltura));
     tabuleiro.style.setProperty('--tam-buraco', Math.floor(tamanho) + 'px');
 }
 
-window.addEventListener('resize', ajustarTamanhoBuracos);
-desenharTabuleiro();
-
-// =========================================================
-// PARTE DO MEMBRO 3: COLISÃO, REGRAS E 1-TOUPEIRA STRICT
-// =========================================================
-
-const estadoPartida = {
-    pontuacao: 0,
-    combo: 1,
-    acertosSeguidos: 0,
-    melhorCombo: 1,
-    acertos: 0,
-    erros: 0,
-    tempoRestante: 60,
-    pausado: false,
-    jogoAtivo: true,
-    intervaloSpawn: null,
-    intervaloTempo: null,
-    audioCtx: null
-};
-
-// Intervalos ajustados para garantir fluxo contínuo
-// Intervalos rebalanceados para um "Game Feel" mais justo
-const VELOCIDADE_DIFICULDADE = {
-    // Fácil: Aparece a cada 2 segundos, fica na tela por 1.7 segundos (dá bastante tempo para pensar)
-    facil:   { intervalo: 2000, exposicao: 1700 },
-    
-    // Médio: Aparece a cada 1.4 segundos, fica na tela por 1.1 segundos (ritmo dinâmico, mas justo)
-    medio:   { intervalo: 1400, exposicao: 1100 },
-    
-    // Difícil: Aparece a cada 1 segundos, fica na tela por 0.85 segundos (modo frenético arcade)
-    dificil: { intervalo: 1000,  exposicao: 850 }
-};
-
-function obterElementoPontuacao() {
-    return document.getElementById('pontValue') || document.querySelector('[name="pontValue"]');
+// ---------------------------------------------------------
+// 4. TOUPEIRAS
+// ---------------------------------------------------------
+function todosBuracos() {
+    return Array.from(tabuleiro.querySelectorAll('.hole'));
 }
 
-function obterElementoTempo() {
-    return document.getElementById('timeValue') || document.querySelector('[name="timeValue"]');
-}
-
-function atualizarPlacarDOM() {
-    const elPont = obterElementoPontuacao();
-    const elTime = obterElementoTempo();
-    const elCombo = document.getElementById('comboValue');
-
-    if (elPont) elPont.textContent = estadoPartida.pontuacao;
-    if (elTime) elTime.textContent = estadoPartida.tempoRestante + 's';
-    if (elCombo) elCombo.textContent = 'x' + estadoPartida.combo;
-}
-
-const containerTabuleiro = document.getElementById('tabuleiro');
-
-containerTabuleiro.addEventListener('mousedown', function (evento) {
-    if (!estadoPartida.jogoAtivo || estadoPartida.pausado) return;
-
-    const buraco = evento.target.closest('.hole');
-    if (!buraco) return;
-
+function mostrarToupeira(buraco, tipo) {
+    const def = TIPOS[tipo];
     const img = buraco.querySelector('.holeimg');
-    if (!img) return;
-
-    processarCliqueBuraco(buraco, img);
-});
-
-function processarCliqueBuraco(buraco, img) {
-    const srcAtual = img.getAttribute('src') || '';
-
-    if (buraco.dataset.armadilha === 'true') {
-        processarExplosao(buraco, img);
-        return;
-    }
-
-    if (buraco.dataset.bombaComum === 'true') {
-        processarBombaComum(buraco, img);
-        return;
-    }
-
-    if (srcAtual.includes('buraco.png')) {
-        registrarFalha(buraco);
-        return;
-    }
-
-    if (srcAtual.includes('topeira_capacete.png')) {
-        const ptsCapacete = 50 * estadoPartida.combo;
-        estadoPartida.pontuacao += ptsCapacete;
-        tocarSomArcade(320, 'square', 0.08);
-
-        img.src = 'imagens/topeira_base2.png';
-        aplicarEfeitoBuraco(buraco, 'hit-capacete');
-        mostrarTextoFlutuante(buraco, 'CAPACETE! +' + ptsCapacete, 'bonus');
-        atualizarPlacarDOM();
-        salvarPontuacaoLocal();
-        return;
-    }
-
-    if (srcAtual.includes('topera-nerd.png')) {
-        aumentarCombo();
-        const ptsNerd = 250 * estadoPartida.combo;
-        estadoPartida.pontuacao += ptsNerd;
-        estadoPartida.tempoRestante = Math.min(99, estadoPartida.tempoRestante + 2);
-        tocarSomArcade(680, 'triangle', 0.12);
-
-        esconderToupeira(buraco, img);
-        aplicarEfeitoBuraco(buraco, 'hit-acerto');
-        mostrarTextoFlutuante(buraco, '+' + ptsNerd + ' (+2s)', 'bonus');
-        atualizarPlacarDOM();
-        salvarPontuacaoLocal();
-        return;
-    }
-
-    if (srcAtual.includes('topera-base.png') || srcAtual.includes('topeira_base2.png')) {
-        aumentarCombo();
-        const ptsBase = 100 * estadoPartida.combo;
-        estadoPartida.pontuacao += ptsBase;
-        tocarSomArcade(520, 'sine', 0.09);
-
-        esconderToupeira(buraco, img);
-        aplicarEfeitoBuraco(buraco, 'hit-acerto');
-        mostrarTextoFlutuante(buraco, '+' + ptsBase, 'positivo');
-        atualizarPlacarDOM();
-        salvarPontuacaoLocal();
-    }
+    img.src = 'imagens/' + def.img;
+    img.alt = def.alt;
+    buraco.dataset.tipo = tipo;
+    buraco.classList.toggle('armadilha-ativa', Boolean(def.perigo));
 }
 
-function aumentarCombo() {
-    estadoPartida.acertos++;
-    estadoPartida.acertosSeguidos++;
-    estadoPartida.combo = Math.min(5, 1 + Math.floor(estadoPartida.acertosSeguidos / 3));
-    if (estadoPartida.combo > estadoPartida.melhorCombo) {
-        estadoPartida.melhorCombo = estadoPartida.combo;
-    }
-}
-
-function registrarFalha(buraco) {
-    estadoPartida.erros++;
-    estadoPartida.acertosSeguidos = 0;
-    estadoPartida.combo = 1;
-
-    const perda = configuracao.modo === 'explosivo' ? 80 : 25;
-    estadoPartida.pontuacao = Math.max(0, estadoPartida.pontuacao - perda);
-    tocarSomArcade(150, 'sawtooth', 0.1);
-
-    aplicarEfeitoBuraco(buraco, 'hit-erro');
-    mostrarTextoFlutuante(buraco, '-' + perda, 'negativo');
-    atualizarPlacarDOM();
-    salvarPontuacaoLocal();
-}
-
-function processarExplosao(buraco, img) {
-    estadoPartida.erros++;
-    estadoPartida.acertosSeguidos = 0;
-    estadoPartida.combo = 1;
-
-    estadoPartida.pontuacao = Math.max(0, estadoPartida.pontuacao - 300);
-    estadoPartida.tempoRestante = Math.max(0, estadoPartida.tempoRestante - 5);
-    tocarSomArcade(90, 'sawtooth', 0.25);
-
-    esconderToupeira(buraco, img);
-    aplicarEfeitoBuraco(document.body, 'tremor-explosao');
-    mostrarTextoFlutuante(buraco, 'BOOM! -300 (-5s)', 'negativo');
-    atualizarPlacarDOM();
-    salvarPontuacaoLocal();
-
-    if (estadoPartida.tempoRestante <= 0) {
-        encerrarPartida('EXPLOSÃO FATAL!');
-    }
-}
-
-function processarBombaComum(buraco, img) {
-    if (buraco.dataset.bombaComum !== 'true') return;
-
-    estadoPartida.acertos++;
-    estadoPartida.acertosSeguidos = 0;
-    estadoPartida.combo = 1;
-    tocarSomArcade(760, 'triangle', 0.1);
-    esconderToupeira(buraco, img);
-    aplicarEfeitoBuraco(buraco, 'hit-capacete');
-    mostrarTextoFlutuante(buraco, 'DESARMADA!', 'bonus');
-    atualizarPlacarDOM();
-    salvarPontuacaoLocal();
-}
-
-function explodirBombaComum(buraco, img) {
-    if (buraco.dataset.bombaComum !== 'true') return;
-
-    estadoPartida.erros++;
-    estadoPartida.acertosSeguidos = 0;
-    estadoPartida.combo = 1;
-    estadoPartida.pontuacao = Math.max(0, estadoPartida.pontuacao - 150);
-    tocarSomArcade(90, 'sawtooth', 0.2);
-    esconderToupeira(buraco, img);
-    aplicarEfeitoBuraco(document.body, 'tremor-explosao');
-    mostrarTextoFlutuante(buraco, 'BOOM! -150', 'negativo');
-    atualizarPlacarDOM();
-    salvarPontuacaoLocal();
-}
-
-// MECÂNICA STRICTA DE 1 TOUPEIRA
-function esconderTodasToupeiras() {
-    const buracos = document.querySelectorAll('.hole');
-    buracos.forEach(function(b) {
-        const img = b.querySelector('.holeimg');
-        if (img && !img.src.includes('buraco.png')) {
-            esconderToupeira(b, img);
-        }
-    });
-}
-
-function esconderToupeira(buraco, img) {
-    if (buraco.dataset.timerId) {
-        clearTimeout(Number(buraco.dataset.timerId));
-        delete buraco.dataset.timerId;
-    }
-    delete buraco.dataset.armadilha;
-    delete buraco.dataset.bombaComum;
+function esconderToupeira(buraco) {
+    cancelarExpiracao(buraco);
+    const img = buraco.querySelector('.holeimg');
+    delete buraco.dataset.tipo;
     buraco.classList.remove('armadilha-ativa');
     img.src = 'imagens/buraco.png';
     img.alt = 'Buraco';
+}
+
+// Regra de 1 toupeira por vez: limpa a tela inteira
+function esconderTodasToupeiras() {
+    todosBuracos().forEach(function (buraco) {
+        if (buraco.dataset.tipo) esconderToupeira(buraco);
+    });
+    expiracoes.forEach(function (e) { clearTimeout(e.timerId); });
+    expiracoes.clear();
+}
+
+function agendarExpiracao(buraco, ms) {
+    const timerId = setTimeout(function () { expirarToupeira(buraco); }, ms);
+    expiracoes.set(buraco, { timerId: timerId, fim: Date.now() + ms, restante: ms });
+}
+
+function cancelarExpiracao(buraco) {
+    const e = expiracoes.get(buraco);
+    if (e) {
+        clearTimeout(e.timerId);
+        expiracoes.delete(buraco);
+    }
+}
+
+function expirarToupeira(buraco) {
+    expiracoes.delete(buraco);
+    if (buraco.dataset.tipo === 'bomba') {
+        explodirBombaComum(buraco);   // bomba que ninguém desarmou
+    } else {
+        esconderToupeira(buraco);
+    }
+}
+
+// Pausa: guarda quanto tempo faltava para cada toupeira sumir...
+function congelarExpiracoes() {
+    expiracoes.forEach(function (e) {
+        clearTimeout(e.timerId);
+        e.restante = Math.max(0, e.fim - Date.now());
+    });
+}
+
+// ...e retoma exatamente de onde parou.
+function retomarExpiracoes() {
+    expiracoes.forEach(function (e, buraco) {
+        e.fim = Date.now() + e.restante;
+        e.timerId = setTimeout(function () { expirarToupeira(buraco); }, e.restante);
+    });
+}
+
+function sortearTipo() {
+    const tabelas = PROBABILIDADES[configuracao.modo];
+    const tabela = tabelas[configuracao.dificuldade] || tabelas.padrao;
+    const sorteio = Math.random();
+    return tabela.find(function (faixa) { return sorteio < faixa[0]; })[1];
+}
+
+function sortearToupeira() {
+    if (estado.fase !== 'rodando') return;
+
+    esconderTodasToupeiras();
+
+    const buracos = todosBuracos();
+    const escolhido = buracos[Math.floor(Math.random() * buracos.length)];
+    mostrarToupeira(escolhido, sortearTipo());
+    agendarExpiracao(escolhido, VELOCIDADE_DIFICULDADE[configuracao.dificuldade].exposicao);
+}
+
+// ---------------------------------------------------------
+// 5. REGRAS
+// ---------------------------------------------------------
+function processarCliqueBuraco(buraco) {
+    switch (buraco.dataset.tipo) {
+        case undefined:  registrarFalha(buraco); break;
+        case 'mina':     processarExplosao(buraco); break;
+        case 'bomba':    desarmarBomba(buraco); break;
+        case 'capacete': acertarCapacete(buraco); break;
+        case 'nerd':     acertarNerd(buraco); break;
+        default:         acertarBase(buraco);      // base e base2
+    }
+}
+
+function pontuar(buraco, pontos, texto, tipoCor, efeito) {
+    estado.pontuacao += pontos;
+    aplicarEfeitoBuraco(buraco, efeito);
+    mostrarTextoFlutuante(buraco, texto, tipoCor);
+    atualizarPlacar();
+}
+
+// O capacete aguenta 1 batida: rende pontos, mas a toupeira continua lá (sem capacete)
+function acertarCapacete(buraco) {
+    const pontos = 50 * estado.combo;
+    tocarSomArcade(320, 'square', 0.08);
+    mostrarToupeira(buraco, 'base2');
+    pontuar(buraco, pontos, 'CAPACETE! +' + pontos, 'bonus', 'hit-capacete');
+}
+
+function acertarNerd(buraco) {
+    aumentarCombo();
+    const pontos = 250 * estado.combo;
+    estado.tempoRestante = Math.min(TEMPO_MAXIMO, estado.tempoRestante + 2);
+    tocarSomArcade(680, 'triangle', 0.12);
+    esconderToupeira(buraco);
+    pontuar(buraco, pontos, '+' + pontos + ' (+2s)', 'bonus', 'hit-acerto');
+}
+
+function acertarBase(buraco) {
+    aumentarCombo();
+    const pontos = 100 * estado.combo;
+    tocarSomArcade(520, 'sine', 0.09);
+    esconderToupeira(buraco);
+    pontuar(buraco, pontos, '+' + pontos, 'positivo', 'hit-acerto');
+}
+
+function aumentarCombo() {
+    estado.acertos++;
+    estado.acertosSeguidos++;
+    estado.combo = Math.min(5, 1 + Math.floor(estado.acertosSeguidos / 3));
+    if (estado.combo > estado.melhorCombo) estado.melhorCombo = estado.combo;
+}
+
+function quebrarCombo() {
+    estado.acertosSeguidos = 0;
+    estado.combo = 1;
+}
+
+function registrarFalha(buraco) {
+    const perda = configuracao.modo === 'explosivo' ? 80 : 25;
+    estado.erros++;
+    quebrarCombo();
+    estado.pontuacao = Math.max(0, estado.pontuacao - perda);
+    tocarSomArcade(150, 'sawtooth', 0.1);
+    aplicarEfeitoBuraco(buraco, 'hit-erro');
+    mostrarTextoFlutuante(buraco, '-' + perda, 'negativo');
+    atualizarPlacar();
+}
+
+// Mina: -300 pontos e -5s. Se o tempo zerar, a partida acaba em derrota.
+function processarExplosao(buraco) {
+    estado.erros++;
+    quebrarCombo();
+    estado.pontuacao = Math.max(0, estado.pontuacao - 300);
+    estado.tempoRestante = Math.max(0, estado.tempoRestante - 5);
+    tocarSomArcade(90, 'sawtooth', 0.25);
+    esconderToupeira(buraco);
+    aplicarEfeitoBuraco(document.body, 'tremor-explosao');
+    mostrarTextoFlutuante(buraco, 'BOOM! -300 (-5s)', 'negativo');
+    atualizarPlacar();
+
+    if (estado.tempoRestante <= 0) encerrarPartida('explosao');
+}
+
+// Bomba comum: clicar a desarma (sem pontos, mas quebra o combo)
+function desarmarBomba(buraco) {
+    estado.acertos++;
+    quebrarCombo();
+    tocarSomArcade(760, 'triangle', 0.1);
+    esconderToupeira(buraco);
+    aplicarEfeitoBuraco(buraco, 'hit-capacete');
+    mostrarTextoFlutuante(buraco, 'DESARMADA!', 'bonus');
+    atualizarPlacar();
+}
+
+// Bomba que ficou tempo demais na tela explode sozinha: -150
+function explodirBombaComum(buraco) {
+    estado.erros++;
+    quebrarCombo();
+    estado.pontuacao = Math.max(0, estado.pontuacao - 150);
+    tocarSomArcade(90, 'sawtooth', 0.2);
+    esconderToupeira(buraco);
+    aplicarEfeitoBuraco(document.body, 'tremor-explosao');
+    mostrarTextoFlutuante(buraco, 'BOOM! -150', 'negativo');
+    atualizarPlacar();
 }
 
 function mostrarTextoFlutuante(buraco, texto, tipoCor) {
@@ -296,213 +348,270 @@ function mostrarTextoFlutuante(buraco, texto, tipoCor) {
     aviso.className = 'feedback-flutuante ' + tipoCor;
     aviso.textContent = texto;
     buraco.appendChild(aviso);
-    setTimeout(function () {
-        aviso.remove();
-    }, 700);
+    setTimeout(function () { aviso.remove(); }, 700);
 }
 
 function aplicarEfeitoBuraco(elemento, classe) {
     elemento.classList.add(classe);
-    setTimeout(function () {
-        elemento.classList.remove(classe);
-    }, 220);
-}
-
-function salvarPontuacaoLocal() {
-    try {
-        localStorage.setItem('ultimaPontuacao', String(estadoPartida.pontuacao));
-        const recorde = parseInt(localStorage.getItem('recordePontuacao') || '0', 10);
-        if (estadoPartida.pontuacao > recorde) {
-            localStorage.setItem('recordePontuacao', String(estadoPartida.pontuacao));
-        }
-    } catch (e) {}
+    setTimeout(function () { elemento.classList.remove(classe); }, 220);
 }
 
 function tocarSomArcade(freq, tipo, duracao) {
     try {
-        if (!estadoPartida.audioCtx) {
+        if (!estado.audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            estadoPartida.audioCtx = new AudioContextClass();
+            estado.audioCtx = new AudioContextClass();
         }
-        const osc = estadoPartida.audioCtx.createOscillator();
-        const gain = estadoPartida.audioCtx.createGain();
+        const ctx = estado.audioCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
         osc.type = tipo;
-        osc.frequency.setValueAtTime(freq, estadoPartida.audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.07, estadoPartida.audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, estadoPartida.audioCtx.currentTime + duracao);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.07, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duracao);
         osc.connect(gain);
-        gain.connect(estadoPartida.audioCtx.destination);
+        gain.connect(ctx.destination);
         osc.start();
-        osc.stop(estadoPartida.audioCtx.currentTime + duracao);
-    } catch (e) {}
+        osc.stop(ctx.currentTime + duracao);
+    } catch (e) { /* sem áudio: o jogo continua normalmente */ }
 }
 
-function sortearToupeira() {
-    if (!estadoPartida.jogoAtivo || estadoPartida.pausado) return;
+// ---------------------------------------------------------
+// 6. CICLO DA PARTIDA
+// ---------------------------------------------------------
+function atualizarPlacar() {
+    elPontuacao.textContent = estado.pontuacao;
+    elTempo.textContent = estado.tempoRestante + 's';
+    elTempo.classList.toggle('critico', estado.tempoRestante <= TEMPO_CRITICO);
+    elCombo.textContent = 'x' + estado.combo;
+}
 
-    // GARANTE APENAS 1 TOUPEIRA POR VEZ: Limpa a tela inteira antes de sortear
+function atualizarBotaoPause() {
+    const pausado = estado.fase === 'pausado';
+    btnPause.setAttribute('aria-pressed', String(pausado));
+    btnPause.setAttribute('aria-label', pausado ? 'Retomar' : 'Pausar');
+    btnPause.title = pausado ? 'Retomar (P)' : 'Pausar (P)';
+}
+
+function iniciarIntervalos() {
+    const vel = VELOCIDADE_DIFICULDADE[configuracao.dificuldade];
+    estado.intervaloSpawn = setInterval(sortearToupeira, vel.intervalo);
+    estado.intervaloTempo = setInterval(passarSegundo, 1000);
+}
+
+function pararIntervalos() {
+    clearInterval(estado.intervaloSpawn);
+    clearInterval(estado.intervaloTempo);
+    estado.intervaloSpawn = null;
+    estado.intervaloTempo = null;
+}
+
+function passarSegundo() {
+    if (estado.fase !== 'rodando') return;
+    estado.tempoRestante--;
+    atualizarPlacar();
+    if (estado.tempoRestante <= 0) encerrarPartida('tempo');
+}
+
+// Começa (ou recomeça) uma partida sem recarregar a página
+function iniciarPartida() {
+    pararIntervalos();
     esconderTodasToupeiras();
 
-    const buracos = Array.from(document.querySelectorAll('.hole'));
-    const escolhido = buracos[Math.floor(Math.random() * buracos.length)];
-    const img = escolhido.querySelector('.holeimg');
-    const sorteio = Math.random();
+    estado.pontuacao = 0;
+    estado.combo = 1;
+    estado.acertosSeguidos = 0;
+    estado.melhorCombo = 1;
+    estado.acertos = 0;
+    estado.erros = 0;
+    estado.tempoRestante = DURACAO_PARTIDA;
+    estado.fase = 'rodando';
 
-    // Probabilidades separadas por Modo para garantir que o capacete aparece sempre
-    if (configuracao.modo === 'explosivo') {
-        if (configuracao.dificuldade === 'dificil'){
-            if (sorteio < 0.10) {       // 10 de chance
-                img.src = 'imagens/bomba.png';
-                img.alt = 'Bomba';
-                escolhido.dataset.bombaComum = 'true';
-                escolhido.classList.add('armadilha-ativa');
-            } else if (sorteio < 0.30) {        // 20 de chance
-                img.src = 'imagens/mina_terrestre.png';
-                img.alt = 'Mina Explosiva';
-                escolhido.dataset.armadilha = 'true';
-                escolhido.classList.add('armadilha-ativa');
-            } else if (sorteio < 0.55) {        // 25 de chance
-                img.src = 'imagens/topeira_capacete.png';
-                img.alt = 'Toupeira de Capacete';
-            } else if (sorteio < 0.65) {        // 10 de chance
-                img.src = 'imagens/topera-nerd.png';
-                img.alt = 'Toupeira Bônus';
-            } else {                    // 35 de chance
-                img.src = 'imagens/topera-base.png';
-                img.alt = 'Toupeira';
-            }
-        } else {
-            if (sorteio < 0.20) {
-                img.src = 'imagens/mina_terrestre.png';
-                img.alt = 'Mina Explosiva';
-                escolhido.dataset.armadilha = 'true';
-                escolhido.classList.add('armadilha-ativa');
-            } else if (sorteio < 0.40) {
-                img.src = 'imagens/topeira_capacete.png';
-                img.alt = 'Toupeira de Capacete';
-            } else if (sorteio < 0.50) {
-                img.src = 'imagens/topera-nerd.png';
-                img.alt = 'Toupeira Bônus';
-            } else {
-                img.src = 'imagens/topera-base.png';
-                img.alt = 'Toupeira';
-            }
-        }
-    } else {
-        // MODO NORMAL (Sem armadilhas)
-        if (sorteio < 0.20) {
-            img.src = 'imagens/topeira_capacete.png';
-            img.alt = 'Toupeira de Capacete';
-        } else if (sorteio < 0.35) {
-            img.src = 'imagens/topera-nerd.png';
-            img.alt = 'Toupeira Bônus';
-        } else {
-            img.src = 'imagens/topera-base.png';
-            img.alt = 'Toupeira';
-        }
-    }
-
-    const eBombaComum = escolhido.dataset.bombaComum === 'true';
-    const tempoExp = (VELOCIDADE_DIFICULDADE[configuracao.dificuldade] || VELOCIDADE_DIFICULDADE.facil).exposicao;
-
-    escolhido.dataset.timerId = setTimeout(function () {
-        if (eBombaComum && escolhido.dataset.bombaComum === 'true') {
-            explodirBombaComum(escolhido, img);
-        } else if (!img.getAttribute('src').includes('buraco.png')) {
-            esconderToupeira(escolhido, img);
-        }
-    }, tempoExp);
+    fecharModal();
+    atualizarPlacar();
+    atualizarBotaoPause();
+    iniciarIntervalos();
 }
 
-function iniciarCicloPartida() {
-    clearInterval(estadoPartida.intervaloSpawn);
-    clearInterval(estadoPartida.intervaloTempo);
-
-    estadoPartida.pontuacao = 0;
-    estadoPartida.combo = 1;
-    estadoPartida.acertosSeguidos = 0;
-    estadoPartida.acertos = 0;
-    estadoPartida.erros = 0;
-    estadoPartida.tempoRestante = 60;
-    estadoPartida.pausado = false;
-    estadoPartida.jogoAtivo = true;
-
-    esconderTodasToupeiras();
-    atualizarPlacarDOM();
-
-    const modal = document.getElementById('modalFimPause');
-    if (modal) modal.hidden = true;
-
-    const vel = VELOCIDADE_DIFICULDADE[configuracao.dificuldade] || VELOCIDADE_DIFICULDADE.facil;
-
-    estadoPartida.intervaloSpawn = setInterval(sortearToupeira, vel.intervalo);
-    estadoPartida.intervaloTempo = setInterval(function () {
-        if (!estadoPartida.pausado && estadoPartida.jogoAtivo) {
-            estadoPartida.tempoRestante--;
-            atualizarPlacarDOM();
-            if (estadoPartida.tempoRestante <= 0) {
-                encerrarPartida('FIM DO TEMPO!');
-            }
-        }
-    }, 1000);
-}
-
-function encerrarPartida(titulo) {
-    estadoPartida.jogoAtivo = false;
-    clearInterval(estadoPartida.intervaloSpawn);
-    clearInterval(estadoPartida.intervaloTempo);
-    esconderTodasToupeiras();
-    salvarPontuacaoLocal();
-    abrirModal(titulo, false);
-}
-
-function abrirModal(titulo, podeContinuar) {
-    const modal = document.getElementById('modalFimPause');
-    if (!modal) return;
-
-    document.getElementById('modalTitulo').textContent = titulo;
-    document.getElementById('modalSubtitulo').textContent = 'PONTUAÇÃO ATUAL: ' + estadoPartida.pontuacao;
-    
-    // Mostra as estatísticas extras que estavam a faltar
-    const modalStats = document.getElementById('modalStats');
-    if (modalStats) {
-        modalStats.innerHTML = 
-            'ACERTOS: ' + estadoPartida.acertos + '<br>' +
-            'ERROS (VAZIO/EXPLOSÕES): ' + estadoPartida.erros + '<br>' +
-            'MAIOR COMBO: x' + estadoPartida.melhorCombo;
-    }
-
-    const btnCont = document.getElementById('btnContinuar');
-    if (btnCont) btnCont.hidden = !podeContinuar;
-
-    modal.hidden = false;
-}
-
-const btnPause = document.querySelector('.pause');
-if (btnPause) {
-    btnPause.addEventListener('click', function () {
-        if (!estadoPartida.jogoAtivo) return;
-        estadoPartida.pausado = !estadoPartida.pausado;
-        if (estadoPartida.pausado) {
-            abrirModal('JOGO PAUSADO', true);
-        } else {
-            const modal = document.getElementById('modalFimPause');
-            if (modal) modal.hidden = true;
-        }
+// Pausa: para os dois setInterval e congela as toupeiras que estão na tela
+function pausarPartida() {
+    if (estado.fase !== 'rodando') return;
+    estado.fase = 'pausado';
+    pararIntervalos();
+    congelarExpiracoes();
+    atualizarBotaoPause();
+    abrirModal({
+        titulo: 'JOGO PAUSADO',
+        subtitulo: 'PONTUAÇÃO ATUAL: ' + estado.pontuacao,
+        estatisticas: [
+            ['TEMPO RESTANTE', estado.tempoRestante + 's'],
+            ['ACERTOS', estado.acertos],
+            ['MAIOR COMBO', 'x' + estado.melhorCombo]
+        ],
+        podeContinuar: true
     });
 }
 
+function retomarPartida() {
+    if (estado.fase !== 'pausado') return;
+    estado.fase = 'rodando';
+    fecharModal();
+    retomarExpiracoes();
+    iniciarIntervalos();
+    atualizarBotaoPause();
+}
+
+function alternarPausa() {
+    if (estado.fase === 'rodando') pausarPartida();
+    else if (estado.fase === 'pausado') retomarPartida();
+}
+
+// motivo: 'tempo' (acabou o relógio) ou 'explosao' (mina zerou o tempo)
+function encerrarPartida(motivo) {
+    if (estado.fase === 'encerrado') return;
+    estado.fase = 'encerrado';
+    pararIntervalos();
+    esconderTodasToupeiras();
+    atualizarBotaoPause();
+
+    const meta = META_PONTOS[configuracao.dificuldade];
+    const venceu = motivo === 'tempo' && estado.pontuacao >= meta;
+    const recorde = salvarPontuacao();
+
+    const estatisticas = [
+        ['PONTUAÇÃO FINAL', estado.pontuacao],
+        ['META', meta],
+        ['ACERTOS', estado.acertos],
+        ['ERROS (VAZIO/EXPLOSÕES)', estado.erros],
+        ['MAIOR COMBO', 'x' + estado.melhorCombo],
+        ['RECORDE', recorde.valor]
+    ];
+
+    let subtitulo = motivo === 'explosao' ? 'EXPLOSÃO FATAL!' : 'FIM DO TEMPO!';
+    if (recorde.novo) subtitulo += ' NOVO RECORDE!';
+
+    abrirModal({
+        titulo: venceu ? 'VITÓRIA!' : 'DERROTA!',
+        subtitulo: subtitulo,
+        estatisticas: estatisticas,
+        podeContinuar: false,
+        classe: venceu ? 'vitoria' : 'derrota'
+    });
+}
+
+function salvarPontuacao() {
+    let recorde = 0;
+    let novo = false;
+    try {
+        recorde = parseInt(localStorage.getItem('recordePontuacao') || '0', 10) || 0;
+        localStorage.setItem('ultimaPontuacao', String(estado.pontuacao));
+        if (estado.pontuacao > recorde) {
+            novo = true;
+            recorde = estado.pontuacao;
+            localStorage.setItem('recordePontuacao', String(recorde));
+        }
+    } catch (e) { /* localStorage indisponível: só não salva */ }
+    return { valor: recorde, novo: novo };
+}
+
+// ---------------------------------------------------------
+// 7. MODAL (PAUSA / FIM DE JOGO)
+// ---------------------------------------------------------
+const modal = document.getElementById('modalFimPause');
+const modalCard = document.getElementById('modalCard');
+const modalTitulo = document.getElementById('modalTitulo');
+const modalSubtitulo = document.getElementById('modalSubtitulo');
+const modalStats = document.getElementById('modalStats');
 const btnContinuar = document.getElementById('btnContinuar');
-if (btnContinuar) {
-    btnContinuar.addEventListener('click', function () {
-        estadoPartida.pausado = false;
-        document.getElementById('modalFimPause').hidden = true;
-    });
-}
-
 const btnReiniciar = document.getElementById('btnReiniciar');
-if (btnReiniciar) {
-    btnReiniciar.addEventListener('click', iniciarCicloPartida);
+
+function abrirModal(dados) {
+    modalCard.className = 'modal-card' + (dados.classe ? ' ' + dados.classe : '');
+    modalTitulo.textContent = dados.titulo;
+    modalSubtitulo.textContent = dados.subtitulo;
+
+    modalStats.innerHTML = '';
+    dados.estatisticas.forEach(function (par) {
+        const linha = document.createElement('div');
+        const rotulo = document.createElement('dt');
+        const valor = document.createElement('dd');
+        rotulo.textContent = par[0];
+        valor.textContent = par[1];
+        linha.append(rotulo, valor);
+        modalStats.appendChild(linha);
+    });
+
+    btnContinuar.hidden = !dados.podeContinuar;
+    modal.hidden = false;
+    (dados.podeContinuar ? btnContinuar : btnReiniciar).focus();
 }
 
-iniciarCicloPartida();
+function fecharModal() {
+    modal.hidden = true;
+}
+
+// ---------------------------------------------------------
+// 8. EVENTOS
+// ---------------------------------------------------------
+tabuleiro.addEventListener('pointerdown', function (evento) {
+    if (evento.button !== 0 || estado.fase !== 'rodando') return;
+    const buraco = evento.target.closest('.hole');
+    if (buraco) processarCliqueBuraco(buraco);
+});
+
+// Teclado (Tab + Enter/Espaço): o clique "sem ponteiro" tem detail === 0
+tabuleiro.addEventListener('click', function (evento) {
+    if (evento.detail !== 0 || estado.fase !== 'rodando') return;
+    const buraco = evento.target.closest('.hole');
+    if (buraco) processarCliqueBuraco(buraco);
+});
+
+btnPause.addEventListener('click', alternarPausa);
+
+btnContinuar.addEventListener('click', function () {
+    retomarPartida();
+    btnPause.focus();
+});
+
+btnReiniciar.addEventListener('click', iniciarPartida);
+
+document.addEventListener('keydown', function (evento) {
+    if (evento.key === 'p' || evento.key === 'P' || evento.key === 'Escape') {
+        alternarPausa();
+    }
+});
+
+// Trocou de aba ou minimizou: pausa para não perder a partida
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) pausarPartida();
+});
+
+// Saiu no meio da partida: guarda o que já foi feito
+window.addEventListener('pagehide', function () {
+    if (estado.fase !== 'encerrado' && estado.pontuacao > 0) salvarPontuacao();
+});
+
+// O modal começa logo abaixo do header, assim o botão pause nunca fica coberto
+function ajustarAlturaHeader() {
+    const header = document.querySelector('.header');
+    document.documentElement.style.setProperty('--altura-header', header.offsetHeight + 'px');
+}
+
+if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(ajustarTamanhoBuracos).observe(tabuleiro);
+    new ResizeObserver(ajustarAlturaHeader).observe(document.querySelector('.header'));
+} else {
+    window.addEventListener('resize', ajustarTamanhoBuracos);
+    window.addEventListener('resize', ajustarAlturaHeader);
+}
+
+// ---------------------------------------------------------
+// INÍCIO
+// ---------------------------------------------------------
+document.getElementById('modoValue').textContent = ROTULO_MODO[configuracao.modo];
+document.getElementById('nivelValue').textContent = ROTULO_NIVEL[configuracao.dificuldade];
+document.getElementById('metaValue').textContent = META_PONTOS[configuracao.dificuldade];
+
+ajustarAlturaHeader();
+desenharTabuleiro();
+iniciarPartida();
