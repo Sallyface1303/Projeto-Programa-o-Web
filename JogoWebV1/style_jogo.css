@@ -31,9 +31,28 @@ body {
 
 .nav-controles {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 25px; 
 }
+
+/* Cronômetro da partida (barra superior) */
+.header-tempo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px;
+    padding: 8px 20px;
+    background-color: #1A0B3D;
+    border: 3px solid #39FF14;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.45), inset 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.header-tempo .hud-titulo { font-size: 10px; }
+.header-tempo .hud-valor { font-size: 22px; }
 
 
 .pause {
@@ -71,15 +90,23 @@ body {
 }
 
 
+/* A página do jogo ocupa exatamente a altura da janela: o tabuleiro nunca estoura a tela */
+.pagina-jogo {
+    height: 100vh;
+    overflow: hidden;
+}
+
 .layout-arcade {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 30px;
+    width: 100%;
     max-width: 1400px;
-    margin: 40px auto;
-    padding: 0 20px;
-    flex-grow: 1;
+    margin: 0 auto;
+    padding: 20px;
+    flex: 1 1 0;
+    min-height: 0;
 }
 
 
@@ -92,7 +119,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 40px;
-    width: 250px;
+    width: 220px;
+    flex: none;
+    align-self: flex-start;
     text-align: center;
 }
 
@@ -114,32 +143,42 @@ body {
     text-shadow: 0 0 10px #F5F0FF;
 }
 
+.hud-valor.pequeno { font-size: 16px; }
+
 .destaque-combo { color: #FFD233; text-shadow: 0 0 15px #FFD233; }
 .destaque-tempo { color: #39FF14; text-shadow: 0 0 15px #39FF14; }
+.destaque-tempo.critico { color: #FF3333; text-shadow: 0 0 15px #FF3333; }
 
 .jogo-container {
     background-color: rgba(0, 0, 0, 0.6);
     border: 6px solid #C4157A;
     border-radius: 16px;
     box-shadow: 0 0 30px #C4157A, inset 0 0 30px rgba(196, 21, 122, 0.4);
-    padding: 30px;
-    min-width: 600px;
-}
-
-.jogo {
+    padding: 20px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+}
+
+/* O tamanho do tabuleiro vem do layout (não do conteúdo): o JS mede e dimensiona os buracos */
+.jogo {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap-buraco, 12px);
 }
 
 .row {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
-}
-
-.row2 {
-    padding: 0 40px;
+    gap: var(--gap-buraco, 12px);
 }
 
 .hole {
@@ -149,6 +188,7 @@ body {
     border: none;
     cursor: crosshair;
     position: relative;
+    touch-action: manipulation;
     transition: transform 0.05s;
 }
 
@@ -199,8 +239,12 @@ body {
 
 .modal-jogo {
     position: fixed;
-    inset: 0;
-    background-color: rgba(13, 2, 33, 0.95); 
+    top: var(--altura-header, 0px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 10px;
+    background-color: rgba(13, 2, 33, 0.88); 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -215,16 +259,23 @@ body {
     background-color: #0D0221;
     border: 5px solid #B968F2;
     box-shadow: 0 0 40px #B968F2, inset 0 0 20px rgba(185, 104, 242, 0.3);
-    padding: 40px;
+    padding: 30px 40px;
     text-align: center;
     max-width: 600px; 
     width: 95%;
+    max-height: 100%;
+    overflow-y: auto;
 }
+
+.modal-card.vitoria { border-color: #39FF14; box-shadow: 0 0 40px #39FF14, inset 0 0 20px rgba(57, 255, 20, 0.25); }
+.modal-card.vitoria h1 { color: #39FF14; text-shadow: 0 0 15px #39FF14; }
+.modal-card.derrota { border-color: #FF3333; box-shadow: 0 0 40px #FF3333, inset 0 0 20px rgba(255, 51, 51, 0.25); }
+.modal-card.derrota h1 { color: #FF3333; text-shadow: 0 0 15px #FF3333; }
 
 .modal-card h1 {
     color: #B968F2;
     font-size: 32px; 
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-shadow: 0 0 15px #B968F2;
 }
 
@@ -240,24 +291,31 @@ body {
     background-color: #1A0B3D;
     border: 3px solid #C4157A;
     padding: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     font-size: 14px; 
-    color: #F5F0FF;
     line-height: 2;
-    text-shadow: 0 0 5px #F5F0FF;
 }
+
+.modal-estatisticas > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.modal-estatisticas dt { color: #C4157A; text-align: left; }
+.modal-estatisticas dd { color: #F5F0FF; text-align: right; text-shadow: 0 0 5px #F5F0FF; }
 
 .modal-acoes {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .btn-acao {
     background-color: #1A0B3D;
     color: #F5F0FF;
     border: 3px solid #C4157A;
-    padding: 20px;
+    padding: 14px;
     font-size: 16px;
     text-decoration: none;
     cursor: pointer;
@@ -279,7 +337,13 @@ body {
 
 
 @media (max-width: 1100px) {
+    .pagina-jogo {
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+    }
     .layout-arcade {
+        flex: none;
         flex-direction: column;
         align-items: center;
     }
@@ -287,11 +351,14 @@ body {
         width: 100%;
         flex-direction: row;
         justify-content: space-around;
+        align-self: auto;
+        gap: 20px;
         padding: 20px;
     }
     .jogo-container {
-        min-width: unset;
+        flex: none;
         width: 100%;
+        height: 60vh;
     }
 }
 

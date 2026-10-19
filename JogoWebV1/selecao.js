@@ -1,25 +1,17 @@
-const CHAVE_CONFIG = 'configuracaoJogo';
-const PADRAO = { modo: 'normal', dificuldade: 'facil' };
-
 const botoes = document.querySelectorAll('.divSelecao');
 const btnJogar = document.getElementById('btnJogar');
 
-const escolha = { ...PADRAO, ...lerSalvo() };
-
-function lerSalvo() {
-    try {
-        return JSON.parse(localStorage.getItem(CHAVE_CONFIG)) || {};
-    } catch (e) {
-        return {};
-    }
-}
+// Parte da URL/localStorage: ao voltar de "Mudar dificuldade", a última escolha continua marcada
+const escolha = lerConfiguracao();
 
 function atualizarDestaque() {
     botoes.forEach(function (botao) {
         const ativo = escolha[botao.dataset.grupo] === botao.dataset.valor;
         botao.classList.toggle('selecionado', ativo);
-        botao.setAttribute('aria-pressed', ativo);
+        botao.setAttribute('aria-pressed', String(ativo));
     });
+    // O link já fica pronto com a escolha atual (funciona até com clique do meio/Ctrl+clique)
+    btnJogar.href = montarUrlJogo(escolha);
 }
 
 botoes.forEach(function (botao) {
@@ -30,11 +22,7 @@ botoes.forEach(function (botao) {
 });
 
 btnJogar.addEventListener('click', function () {
-    try {
-        localStorage.setItem(CHAVE_CONFIG, JSON.stringify(escolha));
-    } catch (e) {
-        console.warn('Não foi possível salvar a configuração:', e);
-    }
+    salvarConfiguracao(escolha);
 });
 
 atualizarDestaque();
