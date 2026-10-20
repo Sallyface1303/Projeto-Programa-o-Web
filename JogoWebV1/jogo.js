@@ -90,16 +90,14 @@ const estadoPartida = {
     audioCtx: null
 };
 
-// Intervalos ajustados para garantir fluxo contínuo
-// Intervalos rebalanceados para um "Game Feel" mais justo
 const VELOCIDADE_DIFICULDADE = {
-    // Fácil: Aparece a cada 2 segundos, fica na tela por 1.7 segundos (dá bastante tempo para pensar)
+    // Fácil: Aparece a cada 2 segundos, fica na tela por 1.7 segundos
     facil:   { intervalo: 2000, exposicao: 1700 },
     
-    // Médio: Aparece a cada 1.4 segundos, fica na tela por 1.1 segundos (ritmo dinâmico, mas justo)
+    // Médio: Aparece a cada 1.4 segundos, fica na tela por 1.1 segundos
     medio:   { intervalo: 1400, exposicao: 1100 },
     
-    // Difícil: Aparece a cada 1 segundos, fica na tela por 0.85 segundos (modo frenético arcade)
+    // Difícil: Aparece a cada 1 segundos, fica na tela por 0.85 segundos
     dificil: { intervalo: 1000,  exposicao: 850 }
 };
 
@@ -268,7 +266,6 @@ function explodirBombaComum(buraco, img) {
     salvarPontuacaoLocal();
 }
 
-// MECÂNICA STRICTA DE 1 TOUPEIRA
 function esconderTodasToupeiras() {
     const buracos = document.querySelectorAll('.hole');
     buracos.forEach(function(b) {
@@ -340,7 +337,6 @@ function tocarSomArcade(freq, tipo, duracao) {
 function sortearToupeira() {
     if (!estadoPartida.jogoAtivo || estadoPartida.pausado) return;
 
-    // GARANTE APENAS 1 TOUPEIRA POR VEZ: Limpa a tela inteira antes de sortear
     esconderTodasToupeiras();
 
     const buracos = Array.from(document.querySelectorAll('.hole'));
@@ -348,7 +344,6 @@ function sortearToupeira() {
     const img = escolhido.querySelector('.holeimg');
     const sorteio = Math.random();
 
-    // Probabilidades separadas por Modo para garantir que o capacete aparece sempre
     if (configuracao.modo === 'explosivo') {
         if (configuracao.dificuldade === 'dificil'){
             if (sorteio < 0.10) {       // 10 de chance
