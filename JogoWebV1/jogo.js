@@ -1,6 +1,4 @@
-// =========================================================
-// PARTE DO MEMBRO 1: DESENHO E CONFIGURAÇÃO
-// =========================================================
+
 const CHAVE_CONFIG = 'configuracaoJogo';
 const PADRAO = { modo: 'normal', dificuldade: 'facil' };
 
@@ -71,9 +69,7 @@ function ajustarTamanhoBuracos() {
 window.addEventListener('resize', ajustarTamanhoBuracos);
 desenharTabuleiro();
 
-// =========================================================
-// PARTE DO MEMBRO 3: COLISÃO, REGRAS E 1-TOUPEIRA STRICT
-// =========================================================
+
 
 const estadoPartida = {
     pontuacao: 0,
