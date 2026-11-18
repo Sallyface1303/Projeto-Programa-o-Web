@@ -1,0 +1,24 @@
+INSTRUÇÕES DE CONFIGURAÇÃO DO BANCO DE DADOS E EXECUÇÃO DO SISTEMA
+
+1. Pré-requisitos:
+- Servidor local com suporte a PHP 8+ e MySQL/MariaDB (ex.: XAMPP, WAMP ou Laragon).
+- Certifique-se de que os módulos Apache e MySQL estejam iniciados.
+
+2. Instalação da pasta do projeto:
+- Copie a pasta do projeto (JogoWebV1) para dentro do diretório público do servidor web (no XAMPP, coloque dentro de C:\xampp\htdocs\JogoWebV1).
+
+3. Configuração de credenciais (se necessário):
+- Por padrão, os arquivos instalar_banco.php e conexao.php utilizam as credenciais padrão do XAMPP:
+  Host: localhost
+  Usuário: root
+  Senha: (vazia)
+- Caso o seu MySQL/MariaDB possua senha definida para o usuário root, edite a variável $senha nos arquivos instalar_banco.php e conexao.php.
+
+4. Criação automática do banco e das tabelas:
+- Abra o navegador e acesse:
+  http://localhost/Projeto-Programa-o-Web/JogoWebV1/instalar_banco.php
+- O script criará automaticamente a base de dados "whack_a_mole", a tabela "usuarios", a tabela "partidas" e um usuário de teste inicial (username: jogador1 / senha: 123456).
+
+5. Acesso ao sistema:
+- Após a mensagem de confirmação na tela de instalação, acesse:
+  http://localhost/Projeto-Programa-o-Web/JogoWebV1/login.php
