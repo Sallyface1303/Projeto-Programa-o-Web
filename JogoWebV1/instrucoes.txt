@@ -21,4 +21,4 @@ INSTRUÇÕES DE CONFIGURAÇÃO DO BANCO DE DADOS E EXECUÇÃO DO SISTEMA
 
 5. Acesso ao sistema:
 - Após a mensagem de confirmação na tela de instalação, acesse:
-  http://localhost/Projeto-Programa-o-Web/JogoWebV1/login.php
+  http://localhost/Projeto-Programa-o-Web/JogoWebV1/cadastro.php para cadastrar um jogador e http://localhost/Projeto-Programa-o-Web/JogoWebV1/login.html para acessar a tela inicial
