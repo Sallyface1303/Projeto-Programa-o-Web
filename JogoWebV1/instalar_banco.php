@@ -92,7 +92,7 @@ try {
                     Senha: 123456
                 </div>
                 <div class="modal-acoes">
-                    <a href="teste_sessao.php" class="btn-acao primario">TESTAR JOGO AGORA (LOGAR COMO TESTE)</a>
+                    <a href="login.php" class="btn-acao primario">IR PARA O LOGIN</a>
                 </div>
             <?php endif; ?>
         </div>

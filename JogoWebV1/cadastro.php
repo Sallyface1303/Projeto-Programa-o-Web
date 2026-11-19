@@ -154,7 +154,7 @@ function escapar(string $valor): string
             </div>
             <button type="submit" class="btn-primary">GRAVAR DADOS</button>
         </form>
-        <a href="titulo.html" class="link">VOLTAR</a>
+        <a href="login.php" class="link">VOLTAR</a>
     </main>
 </body>
 </html>

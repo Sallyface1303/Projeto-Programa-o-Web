@@ -1,4 +1,6 @@
 <?php
+// Edição de dados pessoais (Membro 4).
+// CPF, data de nascimento e username são somente leitura: nunca entram no UPDATE.
 
 function destino(string $base): string
 {
@@ -10,6 +12,7 @@ function escapar(string $valor): string
     return htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+// Controle de sessão: usa o verifica_sessao.php do Membro 2 quando existir.
 if (is_file(__DIR__ . '/verifica_sessao.php')) {
     require_once __DIR__ . '/verifica_sessao.php';
 } else {
@@ -24,7 +27,7 @@ if (is_file(__DIR__ . '/verifica_sessao.php')) {
 
 require_once __DIR__ . '/conexao.php';
 
-$usuarioId = (int) $_SESSION['usuario_id']; //Sessão do usuário
+$usuarioId = (int) $_SESSION['usuario_id'];
 
 if (empty($_SESSION['csrf_edicao'])) {
     $_SESSION['csrf_edicao'] = bin2hex(random_bytes(32));

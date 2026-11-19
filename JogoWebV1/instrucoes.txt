@@ -21,4 +21,12 @@ INSTRUÇÕES DE CONFIGURAÇÃO DO BANCO DE DADOS E EXECUÇÃO DO SISTEMA
 
 5. Acesso ao sistema:
 - Após a mensagem de confirmação na tela de instalação, acesse:
-  http://localhost/Projeto-Programa-o-Web/JogoWebV1/cadastro.php para cadastrar um jogador e http://localhost/Projeto-Programa-o-Web/JogoWebV1/login.html para acessar a tela inicial
+  http://localhost/Projeto-Programa-o-Web/JogoWebV1/cadastro.php para cadastrar um jogador e http://localhost/Projeto-Programa-o-Web/JogoWebV1/login.php (ou index.php) para acessar a tela inicial
+
+6. Login, sessão e logout:
+- index.php e login.php abrem a tela de login. Aceita nome de usuário ou e-mail + senha.
+- Todas as páginas internas (main_menu, selecao, jogo, score, global_score, edicao, perfil)
+  começam com: <?php require_once 'verifica_sessao.php'; ?>
+  Sem login, o visitante é redirecionado para login.php.
+- logout.php encerra a sessão e volta ao login (link "DESCONECTAR" no menu e na tela do jogo).
+- Para criar uma NOVA página restrita, basta colocar a linha acima na 1ª linha do arquivo .php.

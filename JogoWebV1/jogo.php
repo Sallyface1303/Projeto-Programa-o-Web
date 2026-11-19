@@ -1,3 +1,4 @@
+<?php require_once 'verifica_sessao.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-br" class="crt">
 <head>
@@ -12,10 +13,10 @@
     <header class="header">
         <div class="nav-controles">
             <button type="button" class="pause" title="Pausar"></button>
-            <a href="selecao.html" class="btn-topo link-saida">&lt; DESISTIR</a>
+            <a href="selecao.php" class="btn-topo link-saida">&lt; DESISTIR</a>
             <a href="global_score.php" class="btn-topo link-saida">RANKING GLOBAL</a>
             <a href="edicao.php" class="btn-topo link-saida">EDITAR PERFIL</a>
-            <a href="titulo.html" class="btn-topo link-saida">DESCONECTAR</a>
+            <a href="logout.php" class="btn-topo link-saida">DESCONECTAR</a>
         </div>
     </header>
 
@@ -53,12 +54,12 @@
             <div class="modal-acoes">
                 <button type="button" class="btn-acao primario" id="btnContinuar">CONTINUAR</button>
                 <button type="button" class="btn-acao primario" id="btnReiniciar">NOVA PARTIDA</button>
-                <a href="selecao.html" class="btn-acao link-saida">MUDAR CONFIGURAÇÕES</a>
-                <a href="score.html" class="btn-acao link-saida">MEU HISTÓRICO</a>
+                <a href="selecao.php" class="btn-acao link-saida">MUDAR CONFIGURAÇÕES</a>
+                <a href="score.php" class="btn-acao link-saida">MEU HISTÓRICO</a>
                 <a href="global_score.php" class="btn-acao link-saida">RANKING GLOBAL</a>
                 <a href="edicao.php" class="btn-acao link-saida">EDITAR DADOS PESSOAIS</a>
-                <a href="main_menu.html" class="btn-acao link-saida">MENU PRINCIPAL</a>
-                <a href="titulo.html" class="btn-acao link-saida">DESCONECTAR</a>
+                <a href="main_menu.php" class="btn-acao link-saida">MENU PRINCIPAL</a>
+                <a href="logout.php" class="btn-acao link-saida">DESCONECTAR</a>
             </div>
         </div>
     </div>
