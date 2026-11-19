@@ -1,5 +1,4 @@
 <?php
-// Ranking global (Membro 4): melhores partidas de todos os jogadores.
 
 function destino(string $base): string
 {
