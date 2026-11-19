@@ -13,8 +13,8 @@
         <div class="nav-controles">
             <button type="button" class="pause" title="Pausar"></button>
             <a href="selecao.html" class="btn-topo link-saida">&lt; DESISTIR</a>
-            <a href="global_score.html" class="btn-topo link-saida">RANKING GLOBAL</a>
-            <a href="edicao.html" class="btn-topo link-saida">EDITAR PERFIL</a>
+            <a href="global_score.php" class="btn-topo link-saida">RANKING GLOBAL</a>
+            <a href="edicao.php" class="btn-topo link-saida">EDITAR PERFIL</a>
             <a href="titulo.html" class="btn-topo link-saida">DESCONECTAR</a>
         </div>
     </header>
@@ -55,8 +55,8 @@
                 <button type="button" class="btn-acao primario" id="btnReiniciar">NOVA PARTIDA</button>
                 <a href="selecao.html" class="btn-acao link-saida">MUDAR CONFIGURAÇÕES</a>
                 <a href="score.html" class="btn-acao link-saida">MEU HISTÓRICO</a>
-                <a href="global_score.html" class="btn-acao link-saida">RANKING GLOBAL</a>
-                <a href="edicao.html" class="btn-acao link-saida">EDITAR DADOS PESSOAIS</a>
+                <a href="global_score.php" class="btn-acao link-saida">RANKING GLOBAL</a>
+                <a href="edicao.php" class="btn-acao link-saida">EDITAR DADOS PESSOAIS</a>
                 <a href="main_menu.html" class="btn-acao link-saida">MENU PRINCIPAL</a>
                 <a href="titulo.html" class="btn-acao link-saida">DESCONECTAR</a>
             </div>

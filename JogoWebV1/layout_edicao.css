@@ -140,3 +140,40 @@ img{
     border: 0px;
     text-align: center;
 }
+
+/* Edição de perfil em PHP */
+.somenteLeitura{
+    color: #8C7FA8;
+    cursor: not-allowed;
+}
+
+.mensagem{
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.mensagem.erro{
+    color: #FF4D6D;
+    border: 1px solid #FF4D6D;
+}
+
+.mensagem.sucesso{
+    color: #8DFFB3;
+    border: 1px solid #8DFFB3;
+}
+
+button.buttonSave{
+    font-family: 'VT323';
+    font-size: 20px;
+    color: #F5F0FF;
+    cursor: pointer;
+}
+
+.voltar{
+    margin-top: 15px;
+}
+
+.divInfo p{
+    text-align: center;
+}

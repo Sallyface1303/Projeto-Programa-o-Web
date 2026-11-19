@@ -117,3 +117,38 @@ button:hover{
     background-color: #B968F2;
     box-shadow: 0 0 8px #B968F2;
 }
+
+/* Ranking global em PHP */
+.filtroDificuldade,
+.filtroModo{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+button{
+    cursor: pointer;
+}
+
+button.ativo{
+    color: #0D0221;
+    background-color: #0BADBF;
+}
+
+.divTable{
+    overflow-y: auto;
+}
+
+.rankTable td,
+.rankTable th{
+    font-size: 20px;
+    overflow-wrap: anywhere;
+}
+
+.mensagem.erro{
+    color: #FF4D6D;
+    border: 1px solid #FF4D6D;
+    padding: 10px;
+}
